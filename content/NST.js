@@ -91,7 +91,6 @@ function preg_quote(str, delimiter) {
         TYPE_TAG              = 12,
         TYPE_STYLE            = 13,
         TYPE_AT_RULE          = 14;
-        TYPE_CS               = 15; // control structure
   var main = this, // global accessible "this"
       NST = null, // global source tree object
       NSTBox = null,
@@ -313,12 +312,6 @@ function preg_quote(str, delimiter) {
           this.blockComment = false;
         }
       }
-      //konsole.writeln(
-      //  'Parsing line ' + index + ': BL1=' +
-      //  (this.blockLiteral1 ? 'TRUE' : 'FALSE') + ', BL2=' +
-      //  (this.blockLiteral2 ? 'TRUE' : 'FALSE') + ', BC=' +
-      //  (this.blockComment ? 'TRUE' : 'FALSE')
-      //);
       if (this.blockComment) return false;
       /// line comment start matching
       for (i in lc) if (line.indexOf(lc[i]) >= 0)
@@ -386,7 +379,6 @@ function preg_quote(str, delimiter) {
           .replace(/ +/g, '\\s+')
           .replace(/id/g, id)
           .replace(/name/g, '(' + id + ')')
-          //.replace(/\,$/, '\\s*[,{]\\s*$')
           .replace(/\,$/, '(?:\\s*[,{]\\s*$|\\s*$)') // fixed for CSS
           .replace(/\(\)/g, '\\s*(\\([^}{;]*\\))\\s*'));
     };
