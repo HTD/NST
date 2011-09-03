@@ -1,0 +1,3 @@
+content NST content/ xpcnativewrappers=yes
+skin NST classic/1.0 skin/
+overlay chrome://komodo/content/komodo.xul chrome://NST/content/overlay.xul

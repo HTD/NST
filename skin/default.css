@@ -1,0 +1,106 @@
+#NST treechildren::-moz-tree-image() {
+  padding-right: 4px;
+}
+#NST treechildren::-moz-tree-cell-text(selected) {
+  font-weight: bold;
+}
+#NST treechildren::-moz-tree-image(Unknown) {
+  list-style-image: url("chrome://NST/skin/default/node-design.png");
+}
+#NST treechildren::-moz-tree-image(Class) {
+  list-style-image: url("chrome://NST/skin/default/class.png");
+}
+#NST treechildren::-moz-tree-image(Function) {
+  list-style-image: url("chrome://NST/skin/default/function.png");
+}
+#NST treechildren::-moz-tree-image(MethodPrivate) {
+  list-style-image: url('chrome://NST/skin/default/private.png');
+}
+#NST treechildren::-moz-tree-image(MethodProtected) {
+  list-style-image: url('chrome://NST/skin/default/protected.png');
+}
+#NST treechildren::-moz-tree-image(MethodPublic) {
+  list-style-image: url('chrome://NST/skin/default/public.png');
+}
+#NST treechildren::-moz-tree-image(MethodPrivateStatic) {
+  list-style-image: url('chrome://NST/skin/default/private-static.png');
+}
+#NST treechildren::-moz-tree-image(MethodProtectedStatic) {
+  list-style-image: url('chrome://NST/skin/default/protected-static.png');
+}
+#NST treechildren::-moz-tree-image(MethodPublicStatic) {
+  list-style-image: url('chrome://NST/skin/default/public-static.png');
+}
+#NST treechildren::-moz-tree-image(Prototype) {
+  list-style-image: url('chrome://NST/skin/default/prototype.png');
+}
+#NST treechildren::-moz-tree-image(PrototypeClass) {
+  list-style-image: url('chrome://NST/skin/default/prototype-class.png');
+}
+#NST treechildren::-moz-tree-image(jQueryExt) {
+  list-style-image: url('chrome://NST/skin/default/jquery-ext.png');
+}
+#NST treechildren::-moz-tree-image(Tag) {
+  list-style-image: url('chrome://famfamfamsilk/skin/icons/tag.png');
+}
+#NST treechildren::-moz-tree-image(Style) {
+  list-style-image: url('chrome://NST/skin/default/style.png');
+}
+#NST treechildren::-moz-tree-image(AtRule) {
+  list-style-image: url('chrome://NST/skin/default/at-rule.png');
+}
+.sourceClearFilter{
+  list-style-image: url('chrome://komodo/skin/images/list_item_remove.png');
+}
+.toggleSort-icon {
+  list-style-image: url('chrome://NST/skin/default/sort_lines.gif');
+}
+.toggleSort-icon:hover {
+  list-style-image: url('chrome://NST/skin/default/sort_alpha.gif');
+}
+.toggleSort-icon.active {
+  list-style-image: url('chrome://NST/skin/default/sort_alpha.gif');
+  border: 1px solid #888;
+}
+.toggleSort-icon.active:hover {
+  list-style-image: url('chrome://NST/skin/default/sort_lines.gif');
+}
+.toggleExpand-icon {
+  list-style-image: url('chrome://NST/skin/default/collapse.png');
+}
+.toggleExpand-icon:hover {
+  list-style-image: url('chrome://NST/skin/default/expand.png');
+}
+.toggleExpand-icon.active {
+  list-style-image: url('chrome://NST/skin/default/expand.png');
+}
+.toggleExpand-icon.active:hover {
+  list-style-image: url('chrome://NST/skin/default/collapse.png');
+}
+.toggleLocate-icon {
+  list-style-image: url('chrome://komodo/skin/images/tree_select.png');
+}
+.toggleLocate-icon:hover {
+  list-style-image: url('chrome://komodo/skin/images/tree_select_hover.png');
+}
+.toggleLocate-icon.active {
+  list-style-image: url('chrome://komodo/skin/images/tree_select_hover.png');
+}
+.toggleLocate-icon.active:hover {
+  list-style-image: url('chrome://komodo/skin/images/tree_select.png');
+}
+.toggleHTMLfilter-icon {
+  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+}
+.toggleHTMLfilter-icon:hover {
+  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+}
+.toggleHTMLfilter-icon.active {
+  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+}
+.toggleHTMLfilter-icon.active:hover {
+  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+}
+.refreshSource-icon{
+  list-style-image: url('chrome://komodo/skin/global/images/refresh.png');
+}
