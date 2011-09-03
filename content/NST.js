@@ -1423,7 +1423,7 @@ function preg_quote(str, delimiter) {
    * Called from window event listeners: keypress, click
    */
   this.locateLine = function(event) {
-    if (!ko.views.currentView) return;
+    if (!ko.views.manager.currentView) return;
     try {
       if (event && event.keyCode && // Ingore for most keys except...
           event.keyCode != 33 && // PgUp
