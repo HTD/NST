@@ -484,6 +484,7 @@ function preg_quote(str, delimiter) {
             for (i in _functions) // match must be done against all definitions
               if ((m = _functions[i].exec(line)) && m[1]) { // if matched:
         this.text = m[1].replace('this.', '');
+        if(lang == 'C++') this.text = m[1].replace(/^\*/, '');
         if (m[2]) { // default values will be removed:
           if (lang != 'CSS') m[2] = m[2].replace(/\s*=[^,)]*([,)])/g, '$1');
           this.text+= m[2];
@@ -913,6 +914,14 @@ function preg_quote(str, delimiter) {
             break;
           case 'Lua':
             p = new LineParserLua();
+            break;
+          case 'C++':
+            p = new LineParserJS(self.lang,
+                                 ['class name'],
+                                 ['[^else\\s\\(\\)]+\\s+name() {'],
+                                  '[\*a-zA-Z_][.a-zA-Z0-9_:]*',
+                                 ['//'],
+                                 ['/*', '*/']);
             break;
         }
       }(this);
