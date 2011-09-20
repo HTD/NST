@@ -10,6 +10,8 @@
  *
  * Contributors:
  * Sergey Lerg
+ * Roberto Bouzout
+ * wa03
  *
  * Last changes:
  * (0.56) FIXED: Python parser (code nesting, block literals handling)
@@ -52,7 +54,7 @@ xtk.load('chrome://NST/content/konsole.js');
  * Namespaces
  */
 if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.NST) === 'undefined') extensions.NST = { version : '0.55' };
+if (typeof(extensions.NST) === 'undefined') extensions.NST = { version : '0.57' };
 
 /**
  * Regular expressions quoting (from phpjs.org) used for comments
