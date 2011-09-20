@@ -677,9 +677,17 @@ function preg_quote(str, delimiter) {
           defBlock = indent; // matched class
           this.text = parts[1];
           this.type = TYPE_CLASS;
+        } else if ((parts = code.match(/^class\s*(.*)$/))) {
+          defBlock = indent; // matched multi-line class statement
+          this.text = parts[1].concat(' ...)');
+          this.type = TYPE_CLASS;
         } else if ((parts = code.match(/^def\s*(.*):$/))) {
           defBlock = indent; // matched def
           this.text = parts[1];
+          this.type = TYPE_FUNCTION;
+        } else if ((parts = code.match(/^def\s*(.*)$/))) {
+          defBlock = indent; // matched multi-line def statement
+          this.text = parts[1].concat(' ...)');
           this.type = TYPE_FUNCTION;
         } else if (code.match(/:$/)) { // matched control structure
           csBlock = indent;
