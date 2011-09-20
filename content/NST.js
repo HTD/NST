@@ -1308,7 +1308,7 @@ function preg_quote(str, delimiter) {
      * @returns {boolean}
      */
     isVisible : function() {
-      return this.tab &&
+      return this.tab && this.tab.parentNode.selectedItem &&
              this.tab.parentNode.selectedItem.id == 'NST_tab' &&
             !this.tab.parentNode.parentNode.parentNode.collapsed
     },
@@ -1639,6 +1639,9 @@ function preg_quote(str, delimiter) {
             if (!konsole.error)
               alert('Shared library version conflict, ' +
                     'please upgrade Uploader extension.');
+            // This takes care of persistance of NST tab on start:
+            document.persist('right_toolbox_tabs', 'selectedIndex');
+            document.persist('NST_tab', 'selected');
             main.settings.init();
             NST = new NSTClass();
             main.refresh('init');

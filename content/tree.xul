@@ -5,23 +5,23 @@
   <menupopup id="menu_view_tabs_popup">
     <menuitem id="show_NST_tab2"
                observes="show_NST_tab"
-              insertafter="show_codebrowser_tab2"
+              insertafter="show_toolbox2_tab2"
               class="menuitem-iconic-wide"
-              oncommand="ko.uilayout_ensureTabShown('NST_tab', true)"
+              oncommand="ko.uilayout.ensureTabShown('NST_tab', true)"
               label="NST"
                type="checkbox"/>
   </menupopup>
   <menupopup id="tabPicker_popup">
     <menuitem id="show_NST_tab"
-              insertafter="show_codebrowser_tab"
-              oncommand="ko.uilayout_ensureTabShown('NST_tab', true)"
+              oncommand="ko.uilayout.ensureTabShown('NST_tab', true)"
+              insertafter="show_toolbox2_tab"
               label="NST"
               type="checkbox"/>
   </menupopup>
   <tabs id="right_toolbox_tabs">
-    <tab id="NST_tab" label="Source" linkedpanel="NSTviewbox" selected="false" persist="selected" onfocus="extensions.NST.refresh('tab');"/>
+    <tab id="NST_tab" label="Source" linkedpanel="NSTviewbox"/>
   </tabs>
-  <tabpanels id="right_toolbox_tabpanels" persist="selectedIndex">
+  <tabpanels id="right_toolbox_tabpanels">
     <tabpanel flex="1" id="NSTviewbox">
       <vbox flex="1" id="NST-vbox">
         <hbox align="center" id="NST-tabpanel-hbox">
