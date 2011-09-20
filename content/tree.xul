@@ -19,9 +19,9 @@
               type="checkbox"/>
   </menupopup>
   <tabs id="right_toolbox_tabs">
-    <tab id="NST_tab" label="Source"/>
+    <tab id="NST_tab" label="Source" linkedpanel="NSTviewbox" selected="false" persist="selected" onfocus="extensions.NST.refresh('tab');"/>
   </tabs>
-  <tabpanels id="right_toolbox_tabpanels">
+  <tabpanels id="right_toolbox_tabpanels" persist="selectedIndex">
     <tabpanel flex="1" id="NSTviewbox">
       <vbox flex="1" id="NST-vbox">
         <hbox align="center" id="NST-tabpanel-hbox">

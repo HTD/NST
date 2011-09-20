@@ -1637,8 +1637,6 @@ function preg_quote(str, delimiter) {
             if (!konsole.error)
               alert('Shared library version conflict, ' +
                     'please upgrade Uploader extension.');
-            // This one makes NST active on start:
-            document.getElementById('NST_tab').parentNode.selectedIndex = 1;
             main.settings.init();
             NST = new NSTClass();
             main.refresh('init');
