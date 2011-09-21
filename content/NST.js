@@ -1653,7 +1653,7 @@ function preg_quote(str, delimiter) {
               if (event.originalTarget.id == 'NSTviewbox') main.refresh();
             }, false);
             // if we skip refresh when source tab is inactive, we have to...
-            NST.tab.addEventListener('click', function() {
+            NST.tab.addEventListener('focus', function() {
               main.refresh('tab');
             }, false);
             var onToolboxUnloaded = ko.projects.onToolboxUnloaded;
