@@ -1627,11 +1627,19 @@ function preg_quote(str, delimiter) {
       this._updateIcons();
     }
   };
+  ///
+  // Quick dirty hack for bugs happening after opening new Komodo window:
+  //
+  // ko.NST - my sub-namepace for global ko object
+  if (typeof ko.NST === 'undefined') ko.NST = {};
+  // ko.NST.lock - the lock itself
+  if (typeof ko.NST.lock === 'undefined') ko.NST.lock = false;
   /**
    * Extension loader
    */
   this.init = function() {
     hook('komodo-ui-started', function() { // here we have window
+      if (!ko.NST.lock)
       document.loadOverlay('chrome://NST/content/tree.xul',
                            { observe : function(subject, topic, data) {
         if (topic == 'xul-overlay-merged') { // now we have overlay merged, but wait...
@@ -1665,6 +1673,7 @@ function preg_quote(str, delimiter) {
           } catch(e) { konsole.error(e); }
         }
       }});
+      ko.NST.lock = true; // do not initialize it more than once!
     });
   }();
 }).apply(extensions.NST);
