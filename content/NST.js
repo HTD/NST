@@ -1286,13 +1286,26 @@ function preg_quote(str, delimiter) {
   NSTClass.prototype = {
     /**
      * Source tree initialization required after panels swapped
+     * @param {boolean} elements if true only elements will be updated
      */
-    init : function() {
+    init : function(elements) {
       try {
         this.source_tree = document.getElementById('NST');
+        this.tabs = {};
+        this.tabElements = {};
+        /** @type Element **/
+        this.tabs.left = document.getElementById('project_toolbox_tabs');
+        /** @type Element **/
+        this.tabs.right = document.getElementById('right_toolbox_tabs');
+        /** @type array **/
+        this.tabElements.left = this.tabs.left.getElementsByTagName('tab');
+        /** @type array **/
+        this.tabElements.right = this.tabs.right.getElementsByTagName('tab');
+        /** @type Element **/
         this.tab = document.getElementById('NST_tab');
         this.search_box = document.getElementById('NST-search-text');
         this.node_info = document.getElementById('NST-node-info');
+        if (elements) return;
         this.source_tree.setAttribute('hidden', false);
         this.sourceTreeView = new SourceTreeViewClass();
         this.sourceTreeView.setTree(this.source_tree);
@@ -1552,6 +1565,7 @@ function preg_quote(str, delimiter) {
      * Initial settings (if none set)
      */
     defaults : {
+      left : false,
       locate : true,
       expand : true,
       sort : false,
@@ -1563,21 +1577,22 @@ function preg_quote(str, delimiter) {
      * @param {boolean} state
      */
     _switchIcon : function(id, state) {
-      var i,
-          icon = document.getElementById(id),
-          classes = icon.getAttribute('class').split(' ');
-      if (state) {
-        if (classes.indexOf('active') < 0) classes.push('active');
-      } else {
-        if ((i = classes.indexOf('active')) >= 0) delete classes[i];
+      var i, icon = document.getElementById(id), classes;
+      if (icon) {
+        classes = icon.getAttribute('class').split(' ');
+        if (state) {
+          if (classes.indexOf('active') < 0) classes.push('active');
+        } else {
+          if ((i = classes.indexOf('active')) >= 0) delete classes[i];
+        }
+        icon.setAttribute('class', classes.join(' '));
+        icon.setAttribute('checked', state);
       }
-      icon.setAttribute('class', classes.join(' '));
-      icon.setAttribute('checked', state);
     },
     /**
      * Updates toggle-icons to their current states
      */
-    _updateIcons : function() {
+    updateIcons : function() {
       for (var p in this.defaults)
         this._switchIcon('NST-toggle-' + p, this.get(p));
     },
@@ -1624,7 +1639,7 @@ function preg_quote(str, delimiter) {
         if (!ko.services.prefs.prefs.hasBooleanPref('extensions.NST.' + p))
           this.set(p, this.defaults[p]);
       }
-      this._updateIcons();
+      //this.updateIcons();
     }
   };
   ///
@@ -1635,45 +1650,96 @@ function preg_quote(str, delimiter) {
   // ko.NST.lock - the lock itself
   if (typeof ko.NST.lock === 'undefined') ko.NST.lock = false;
   /**
+   * Returns true if NST is found in left panel
+   * @returns {boolean}
+   */
+  this.NSTleft = function() {
+    var i, ls, l, t;
+    // we need to get elements again in case NST panel was moved
+    ls = NST.tabs.left = document.getElementById('project_toolbox_tabs');
+    l = NST.tabElements.left = NST.tabs.left.getElementsByTagName('tab');
+    t = NST.tab = document.getElementById('NST_tab');
+    for (i = 0; i < l.length; i++) if (l[i] === t) return true;
+    return false;
+  }
+  /**
+   * Fix for broken tab persistence
+   * @param {boolean} initFix
+   */
+  this.handleTabs = function(initFix) {
+    NST.init(1); // elements should be updated if a tab was moved
+    var i,
+        ls = NST.tabs.left, rs = NST.tabs.right, // left and right tabs elements
+        lsi = ls.selectedIndex, rsi = rs.selectedIndex, // tab element selected indices
+        l = NST.tabElements.left, r = NST.tabElements.right; // left and right tab element arrays
+    for (i = 0; i < l.length; i++) { // for each left panel tab (NST can be moved there)
+      document.persist(l[i].id, 'selected'); // we need to save its selected state
+      if (initFix && i == lsi && l[i] === NST.tab) { // if NST is seleced on start
+        ko.uilayout.ensureTabShown(l[i - 1].id, true); // the other tab is shown to force NST tab redraw
+        ko.uilayout.ensureTabShown('NST_tab', true); // and finally NST tab is shown
+      }
+    }
+    for (i = 0; i < r.length; i++) { // the same goes for the right panel
+      document.persist(r[i].id, 'selected');
+      if (initFix && i == rsi && r[i] === NST.tab) {
+        ko.uilayout.ensureTabShown(r[i - 1].id, true);
+        ko.uilayout.ensureTabShown('NST_tab', true);
+      }
+    }
+    // now we can store selected indices
+    document.persist('project_toolbox_tabs', 'selectedIndex');
+    document.persist('right_toolbox_tabs', 'selectedIndex');
+  };
+  /**
    * Extension loader
    */
   this.init = function() {
     hook('komodo-ui-started', function() { // here we have window
-      if (!ko.NST.lock)
-      document.loadOverlay('chrome://NST/content/tree.xul',
-                           { observe : function(subject, topic, data) {
-        if (topic == 'xul-overlay-merged') { // now we have overlay merged, but wait...
-          try {
-            if (!konsole.error)
-              alert('Shared library version conflict, ' +
-                    'please upgrade Uploader extension.');
-            // This takes care of persistance of NST tab on start:
-            document.persist('right_toolbox_tabs', 'selectedIndex');
-            document.persist('NST_tab', 'selected');
-            main.settings.init();
-            NST = new NSTClass();
-            main.refresh('init');
-            hook('current_view_changed', function() { main.refresh('view'); });
-            hook('file_changed', function() { main.refresh('file'); });
-            if (main.settings.get('locate')) main.setAutoLocate(true);
-            // This happens after NST tab is moved
-            document.addEventListener('DOMNodeInserted', function(event) {
-              if (event.originalTarget.id == 'NSTviewbox') main.refresh();
-            }, false);
-            // if we skip refresh when source tab is inactive, we have to...
-            NST.tab.addEventListener('focus', function() {
-              main.refresh('tab');
-            }, false);
-            var onToolboxUnloaded = ko.projects.onToolboxUnloaded;
-            ko.projects.onToolboxUnloaded = function() {
-              NST.hide();
-              ko.views.manager.currentView = undefined;
-              onToolboxUnloaded();
-            }
-          } catch(e) { konsole.error(e); }
-        }
-      }});
-      ko.NST.lock = true; // do not initialize it more than once!
+      if (!ko.NST.lock) {
+        main.settings.init(); // this loads defaults if ran for the first time
+        var overlay = main.settings.get('left') // yes, bottom panel is NOT SUPPORTED
+          ? 'chrome://NST/content/tree-l.xul' // left overlay or
+          : 'chrome://NST/content/tree-r.xul'; // right overlay
+        document.loadOverlay(overlay,
+                             { observe : function(subject, topic, data) {
+          if (topic == 'xul-overlay-merged') { // now we have overlay merged, but wait...
+            try {
+              if (!konsole.error)
+                alert('Shared library version conflict, ' +
+                      'please upgrade Uploader extension.');
+              main.settings.updateIcons(); // now it's done here
+              NST = new NSTClass();
+              main.handleTabs(1);
+              main.refresh('init');
+              hook('current_view_changed', function() { main.refresh('view'); });
+              hook('file_changed', function() { main.refresh('file'); });
+              if (main.settings.get('locate')) main.setAutoLocate(true);
+              // This happens when a tab is moved
+              document.addEventListener('DOMNodeInserted', function(event) {
+                // ...and if it's NST tab...
+                if (event.originalTarget.id == 'NSTviewbox') {
+                  main.handleTabs(1);
+                  main.settings.set('left', main.NSTleft());
+                  window.setTimeout(main.refresh, 100, false);
+                }
+              }, false);
+              // if we skip refresh when source tab is inactive, we have to...
+              NST.tab.addEventListener('focus', function() {
+                main.refresh('tab');
+              }, false);
+              var onToolboxUnloaded = ko.projects.onToolboxUnloaded;
+              ko.projects.onToolboxUnloaded = function() {
+                NST.hide();
+                ko.views.manager.currentView = undefined;
+                onToolboxUnloaded();
+              }
+            } catch(e) { konsole.error(e); }
+          }
+        }});
+        ko.NST.lock = true; // do not initialize it more than once!
+      }
     });
+    // let's ensure the tab settings are stored on exit:
+    addEventListener("unload", function() { main.handleTabs(0); }, false);
   }();
 }).apply(extensions.NST);
