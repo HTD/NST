@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<?xml-stylesheet href="chrome://NST/skin/default.css" type="text/css"?>
+<overlay id="NSTOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <menupopup id="menu_view_tabs_popup">
+    <menuitem id="show_NST_tab2"
+               observes="show_NST_tab"
+              insertafter="show_toolbox2_tab2"
+              class="menuitem-iconic-wide"
+              oncommand="ko.uilayout.ensureTabShown('NST_tab', true)"
+              label="NST"
+               type="checkbox"/>
+  </menupopup>
+  <menupopup id="tabPicker_popup">
+    <menuitem id="show_NST_tab"
+              oncommand="ko.uilayout.ensureTabShown('NST_tab', true)"
+              insertafter="show_toolbox2_tab"
+              label="NST"
+              type="checkbox"/>
+  </menupopup>
+  <tabs id="right_toolbox_tabs">
+    <tab id="NST_tab" label="Source" linkedpanel="NSTviewbox"/>
+  </tabs>
+  <tabpanels id="right_toolbox_tabpanels">
+    <tabpanel flex="1" id="NSTviewbox">
+      <vbox flex="1" id="NST-vbox">
+        <hbox align="center" id="NST-tabpanel-hbox">
+          <toolbarbutton id="NST-toggle-locate"
+                         tooltiptext="Toggle automatic location of the current line"
+                         buttonstyle="pictures"
+                         label="Auto locate"
+                         class="toggleLocate-icon"
+                         oncommand="extensions.NST.toggleLocate();"/>
+          <toolbarbutton id="NST-toggle-expand"
+                         tooltiptext="Toggle expand/collapse setting"
+                         buttonstyle="pictures"
+                         label="Expand/Collapse"
+                         class="toggleExpand-icon"
+                         oncommand="extensions.NST.toggleExpand();"/>
+          <toolbarbutton id="NST-toggle-sort"
+                         tooltiptext="Toggle tree ordering"
+                         buttonstyle="pictures"
+                         label="Toggle sorting"
+                         class="toggleSort-icon"
+                         oncommand="extensions.NST.toggleSort();"/>
+          <toolbarbutton id="NST-toggle-HTMLfilter"
+                         tooltiptext="Toggle HTML filter"
+                         buttonstyle="pictures"
+                         label="Toggle HTML filter"
+                         class="toggleHTMLfilter-icon"
+                         oncommand="extensions.NST.toggleHTMLfilter();"/>
+          <spacer/>
+          <textbox id="NST-search-text"
+                   value=""
+                   oninput="extensions.NST.search();"
+                   flex="1"
+                   class="search-box"/>
+          <toolbarbutton id="NST-filter-classes-button"
+                         tooltiptext="Remove the filter"
+                         buttonstyle="pictures"
+                         label="Remove Filter"
+                         class="sourceClearFilter"
+                         oncommand="extensions.NST.removeFilter();"/>
+          <toolbarbutton id="NST-refresh-directory-button"
+                         tooltiptext="Reload tree"
+                         buttonstyle="pictures"
+                         label="Refresh"
+                         class="refreshSource-icon"
+                         oncommand="extensions.NST.refresh('button');"/>
+        </hbox>
+        <tree id="NST"
+              flex="1"
+              hidecolumnpicker="true"
+              hideheader="true"
+              flags="dont-build-content"
+              seltype="single"
+              style="-moz-user-focus:ignore">
+          <treecols>
+            <treecol flex="1" primary="true" hideheader="true"/>
+          </treecols>
+          <treechildren tooltip="NST-item-tooltip"
+                        onclick="extensions.NST.go(event);"/>
+        </tree>
+        <tooltip id="NST-item-tooltip" noautohide="true" onpopupshowing="extensions.NST.nodeInfo(event);">
+          <hbox><label id="NST-node-info" value=""></label></hbox>
+        </tooltip>
+      </vbox>
+    </tabpanel>
+  </tabpanels>
+</overlay>
