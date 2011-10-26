@@ -5,12 +5,6 @@ by Adam Łyskawa
 Contributors:
 Sergey Lerg (LUA parser)
 
-Last changes:
-(0.57) FIXED: tree column bug with another Komodo window, moving between panels,
-       startup issues
-(0.56) FIXED: Python parser (code nesting, block literals handling)
-(0.55) ADDED: support for the Lua language
-
 -----------
 -- Notes --
 -----------
@@ -49,4 +43,3 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-

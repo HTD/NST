@@ -5,19 +5,13 @@
  *
  * Code Browser -like extension for Komodo Edit
  *
- * @version 0.57
+ * @version 0.58
  * @author Adam Łyskawa
  *
  * Contributors:
  * Sergey Lerg
  * Roberto Bouzout
  * wa03
- *
- * Last changes:
- * (0.57) FIXED: tree column bug with another Komodo window, moving between
- * panels, startup issues
- * (0.56) FIXED: Python parser (code nesting, block literals handling)
- * (0.55) ADDED: support for the Lua language
  *
  * Copyright (c) 2010, Adam Łyskawa
  * All rights reserved.
@@ -56,7 +50,7 @@ xtk.load('chrome://NST/content/konsole.js');
  * Namespaces
  */
 if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.NST) === 'undefined') extensions.NST = { version : '0.57' };
+if (typeof(extensions.NST) === 'undefined') extensions.NST = { version : '0.58' };
 
 /**
  * Regular expressions quoting (from phpjs.org) used for comments
@@ -1432,6 +1426,7 @@ function preg_quote(str, delimiter) {
       var t = NST.sourceTreeView,
           v = ko.views.manager.currentView,
           row = t.selection.currentIndex;
+      if (!t.getRowCount()) return false;
       if (row > -1) {
         v.scimoz.gotoLine(t.getLinePosition(row) - 1);
         v.setFocus();
@@ -1619,7 +1614,7 @@ function preg_quote(str, delimiter) {
     change : function(name) {
       var result;
       this.set(name, result = !this.get(name));
-      this._updateIcons();
+      this.updateIcons();
       return result;
     },
     show : function(name) {
@@ -1641,7 +1636,6 @@ function preg_quote(str, delimiter) {
         if (!ko.services.prefs.prefs.hasBooleanPref('extensions.NST.' + p))
           this.set(p, this.defaults[p]);
       }
-      //this.updateIcons();
     }
   };
   ///
