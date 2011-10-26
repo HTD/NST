@@ -14,6 +14,8 @@
  * wa03
  *
  * Last changes:
+ * (0.57) FIXED: tree column bug with another Komodo window, moving between
+ * panels, startup issues
  * (0.56) FIXED: Python parser (code nesting, block literals handling)
  * (0.55) ADDED: support for the Lua language
  *
