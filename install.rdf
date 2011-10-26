@@ -4,7 +4,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>NST@nisza.org</em:id>
     <em:name>NST</em:name>
-    <em:version>0.57</em:version>
+    <em:version>0.58</em:version>
     <em:description>A source tree with all the available classes, methods and functions</em:description>
     <em:creator>Adam Lyskawa</em:creator>
     <em:homepageURL>http://community.activestate.com/xpi/nst-new-source-tree</em:homepageURL>
