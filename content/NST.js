@@ -5,7 +5,7 @@
  *
  * Code Browser -like extension for Komodo Edit
  *
- * @version 0.58
+ * @version 0.59
  * @author Adam Łyskawa
  *
  * Contributors:
@@ -41,16 +41,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// tools for common Komodo extension chores
-xtk.load('chrome://NST/content/toolkit.js');
 // Komodo console in Output Window
-xtk.load('chrome://NST/content/konsole.js');
+//xtk.load('chrome://NST/content/konsole.js');
+
+
+
 
 /**
  * Namespaces
  */
-if (typeof(extensions) === 'undefined') extensions = {};
-if (typeof(extensions.NST) === 'undefined') extensions.NST = { version : '0.58' };
+if (typeof ko.extensions === 'undefined') ko.extensions = {};
+if (typeof ko.extensions.NST === 'undefined') ko.extensions.NST = { version : '0.59' };
 
 /**
  * Regular expressions quoting (from phpjs.org) used for comments
@@ -67,6 +68,93 @@ function preg_quote(str, delimiter) {
  * Extension code
  */
 (function () {
+  /**
+   * Services shortcuts
+   */
+  if (typeof(ko.services) == 'undefined')  ko.services = {};
+  /**
+   * OS Service shortcut
+   */
+  ko.services.os =
+    Components
+    .classes["@activestate.com/koOs;1"]
+    .getService(Components.interfaces.koIOs);
+  /**
+   * Preferences Service shortcut
+   */
+  ko.services.prefs =
+    Components
+    .classes["@activestate.com/koPrefService;1"]
+    .getService(Components.interfaces.koIPrefService);
+  /**
+   * Remote Connect Service shortcut
+   */
+  ko.services.rConnect =
+    Components
+    .classes["@activestate.com/koRemoteConnectionService;1"]
+    .getService(Components.interfaces.koIRemoteConnectionService);
+  /**
+   * Document Service shortcut
+   */
+  ko.services.doc =
+    Components
+    .classes["@activestate.com/koDocumentService;1"]
+    .getService(Components.interfaces.koIDocumentService);
+  /**
+   * Observer Service shortcut
+   */
+  ko.services.observer =
+    Components
+    .classes["@mozilla.org/observer-service;1"]
+    .getService(Components.interfaces.nsIObserverService);
+  /**
+   * System Utilities Service shortcut
+   */
+  ko.services.sys =
+    Components
+    .classes['@activestate.com/koSysUtils;1']
+    .getService(Components.interfaces.koISysUtils); 
+  var windowEvents = [
+    'codeintel_activated_window',
+    'codeintel_deactivated_window',
+    'current_view_changed',
+    'current_view_check_status',
+    'current_view_encoding_changed',
+    'current_view_language_changed',
+    'current_view_linecol_changed',
+    'load',
+    'view_closed',
+    'view_list_closed',
+    'view_opened'
+  ];
+  /**
+   * Hooks komodo events, to make life easier and code with style
+   * Inspired with DRY rule and Ockham's Razor
+   * To be updated to match further Komodo versions
+   * @param {string} events separated with space (jQuery style)
+   * @param {function} callback
+   */
+  var hook = function(events, callback) {
+    events = typeof events === 'string' ? events.split(' ') : events;
+    for (var i in events) {
+      if (windowEvents.indexOf(events[i]) < 0) // global events
+        ko.services.observer.addObserver({ observe : callback }, events[i], false);
+      else {
+        if (parent && parent.window) // Komodo 7 pane
+          parent.window.addEventListener(events[i], callback, false)
+        else // Main window context
+          window.addEventListener(events[i], callback, false); // window events
+      }
+    }
+  };
+  var debug = function(exception) {
+    alert('ERROR: ' + exception.message + '\n' +
+          'in line ' + exception.lineNumber + ' ' +
+          'of ' + exception.fileName + '.');
+  };
+  ///
+  /// Common constants
+  ///
   const // Rows indices
         TR_TEXT               = 0, // text
         TR_LEVEL              = 1, // tree level
@@ -89,8 +177,11 @@ function preg_quote(str, delimiter) {
         TYPE_TAG              = 12,
         TYPE_STYLE            = 13,
         TYPE_AT_RULE          = 14;
-  var main = this, // global accessible "this"
-      NST = null, // global source tree object
+  ///
+  /// Extension scoped variables
+  ///
+  var main = this,
+      NST = null,
       NSTBox = null,
       NSTView = null,
   /**
@@ -634,7 +725,7 @@ function preg_quote(str, delimiter) {
    * Line parser for Python, because it's no other language like Python
    */
   LineParserPython = function() {
-    this.document = ko.views.manager.currentView.document;
+    this.document = ko.views.manager.currentView.koDoc;
     this.indent = this.document.indentWidth;
     this.index = -1; // processed line number
     this.text = null;
@@ -718,7 +809,7 @@ function preg_quote(str, delimiter) {
    */
   LineParserLua = function() {
     /// Public properties
-    this.document = ko.views.manager.currentView.document;
+    this.document = ko.views.manager.currentView.koDoc;
     this.index = -1;
     this.text = null; // node text
     this.type = TYPE_UNKNOWN; // node type
@@ -844,7 +935,7 @@ function preg_quote(str, delimiter) {
      * @param view
      */
     parse : function() {
-      var d = ko.views.manager.currentView.document,
+      var d = ko.views.manager.currentView.koDoc,
           l = this.lines = d.buffer.split(/\r?\n|\r/), // code lines
           n = this.nodeList = new nodeList(), // nodeList object
           b = this.backupList = new nodeList(), // backup nodeList
@@ -1119,7 +1210,7 @@ function preg_quote(str, delimiter) {
       try {
 
         properties.AppendElement(this._icons[this.getNodeByRow(row).type]);
-      } catch(e) { konsole.error(e); }
+      } catch(e) { debug(e); }
     },
     /**
      * Gets rows tree level
@@ -1196,7 +1287,7 @@ function preg_quote(str, delimiter) {
         }
         this.tree.invalidateRow(row);
         this.mapRows();
-      } catch(e) { konsole.error(e); }
+      } catch(e) { debug(e); }
       finally {
         delete this._toggleOpenStateLock;
       }
@@ -1287,22 +1378,9 @@ function preg_quote(str, delimiter) {
     init : function(elements) {
       try {
         this.source_tree = document.getElementById('NST');
-        this.tabs = {};
-        this.tabElements = {};
-        /** @type Element **/
-        this.tabs.left = document.getElementById('project_toolbox_tabs');
-        /** @type Element **/
-        this.tabs.right = document.getElementById('right_toolbox_tabs');
-        /** @type array **/
-        this.tabElements.left = this.tabs.left.getElementsByTagName('tab');
-        /** @type array **/
-        this.tabElements.right = this.tabs.right.getElementsByTagName('tab');
-        /** @type Element **/
-        this.tab = document.getElementById('NST_tab');
         this.search_box = document.getElementById('NST-search-text');
         this.node_info = document.getElementById('NST-node-info');
         if (elements) return;
-        this.source_tree.setAttribute('hidden', false);
         this.sourceTreeView = new SourceTreeViewClass();
         this.sourceTreeView.setTree(this.source_tree);
         this.source_tree.treeBoxObject.view = this.sourceTreeView;
@@ -1310,22 +1388,7 @@ function preg_quote(str, delimiter) {
         main.NST = this;
         main.NSTBox = this.source_tree.treeBoxObject;
         main.NSTView = this.sourceTreeView;
-      } catch (e) { konsole.error(e); }
-    },
-    /**
-     * Returns true if Source tab is visible (selected and not collapsed)
-     * @returns {boolean}
-     */
-    isVisible : function() {
-      return this.tab && this.tab.parentNode.selectedItem &&
-             this.tab.parentNode.selectedItem.id == 'NST_tab' &&
-            !this.tab.parentNode.parentNode.parentNode.collapsed
-    },
-    /**
-     * Hides tree
-     */
-    hide : function() {
-      this.source_tree.setAttribute('hidden', true);
+      } catch (e) { debug(e); }
     },
     /**
      * Loads tree nodes into rows
@@ -1337,7 +1400,7 @@ function preg_quote(str, delimiter) {
                             ? filteredNodes
                             : CodeParser.nodeList.nodes);
         if (main.settings.get('expand')) this.sourceTreeView.toggleOpenAll();
-      } catch (e) { konsole.error(e); }
+      } catch (e) { debug(e); }
     },
     /**
      * Sorts tree nodes by type, then by name
@@ -1355,7 +1418,7 @@ function preg_quote(str, delimiter) {
               else return 1;
             }
           });
-      } catch(e) { konsole.error(e); }
+      } catch(e) { debug(e); }
     },
     /**
      * Filters tree
@@ -1376,14 +1439,13 @@ function preg_quote(str, delimiter) {
             delete nodes[i];
         if (nodes) this.loadTree(nodes); else return false;
         return true;
-      } catch (e) { konsole.error(e); return false; }
+      } catch (e) { debug(e); return false; }
     },
     /**
      * Reload feature
      * @param {object} view
      */
     reloadSource : function() {
-      if (!ko.views.manager.currentView.document) return;
       try {
         if (!this.sourceTreeView.tree) this.init();
         CodeParser.settings = main.settings;
@@ -1392,7 +1454,7 @@ function preg_quote(str, delimiter) {
         if (!this.filterTree()) this.loadTree();
         if (main.settings.get('locate')) main.locateLine();
         this.viewChanged = false;
-      } catch (e) { konsole.error(e); }
+      } catch (e) { debug(e); }
     }
   };
   /**
@@ -1432,7 +1494,7 @@ function preg_quote(str, delimiter) {
         v.setFocus();
         ko.commands.doCommand('cmd_editCenterVertically');
       }
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
     return false;
   };
   /**
@@ -1445,7 +1507,7 @@ function preg_quote(str, delimiter) {
           i =  NST.node_info;
       if (n && n.info) i.value = n.info;
       else event.preventDefault();
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   };
   /**
    * Locates current line in source tree
@@ -1474,7 +1536,7 @@ function preg_quote(str, delimiter) {
       if (r - m < 1) b.scrollToRow(0);
       else if (r + m > v._rows.length) b.scrollToRow(v._rows.length - h);
       else b.scrollToRow(r - m);
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   };
   /**
    * Sets line auto-locate feature
@@ -1496,30 +1558,37 @@ function preg_quote(str, delimiter) {
       var s = this.settings.change('locate');
       this.setAutoLocate(s);
       if (s) this.locateLine();
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   };
   this.toggleHTMLfilter = function() {
     try {
       var s = this.settings.change('HTMLfilter');
       this.refresh();
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   }
   /**
    * Refresh button handler
    * Called from XUL
    * @param view (current view)
    */
-  this.refresh = function(saysWho) {
+  this.refresh = function() {
     try {
-      if (!NST) NST = new NSTClass();
-      if (saysWho != 'tab') NST.unchanged = false;
-      if (ko.views.manager.currentView) {
-        if (!NST.isVisible()) return;
-        if (NST.unchanged) return;
+      if (ko.views.manager.currentView &&
+          ko.views.manager.currentView.koDoc &&
+          ko.views.manager.currentView.koDoc.buffer) {
+        if (!NST) NST = new NSTClass();
+        // Here we prevent reloading when source tree is not visible:
+        if (typeof ko.uilayout.isTabShown === 'function') { // Komodo 7 way
+          if (!ko.uilayout.isTabShown('NST-viewbox')) return;
+        } else { // Komodo 6 way
+          var t = document.getElementById('NST_tab');
+          if (!t || !t.parentNode.selectedItem ||
+              t.parentNode.selectedItem.id != 'NST_tab' ||
+              t.parentNode.parentNode.parentNode.collapsed) return;
+        }
         NST.reloadSource();
-        NST.unchanged = true;
-      }
-    } catch (e) { konsole.error(e); }
+      } else NST.init();
+    } catch (e) { debug(e); }
   };
   /**
    * Toggles tree sorting
@@ -1529,7 +1598,7 @@ function preg_quote(str, delimiter) {
     try {
       this.settings.change('sort');
       this.refresh();
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   };
   /**
    * Removes search filter from displayed tree
@@ -1541,7 +1610,7 @@ function preg_quote(str, delimiter) {
       t.search_box.value = '';
       t.loadTree();
     } catch (e) {
-      konsole.error(e);
+      debug(e);
     }
   };
   /**
@@ -1552,7 +1621,7 @@ function preg_quote(str, delimiter) {
     try {
       var t = NST;
       if (t.search_box.value) t.filterTree(); else t.loadTree();
-    } catch (e) { konsole.error(e); }
+    } catch (e) { debug(e); }
   };
   /**
    * Extension settings module
@@ -1638,104 +1707,29 @@ function preg_quote(str, delimiter) {
       }
     }
   };
-  ///
-  // Quick dirty hack for bugs happening after opening new Komodo window:
-  //
-  // ko.NST - my sub-namepace for global ko object
-  if (typeof ko.NST === 'undefined') ko.NST = {};
-  // ko.NST.lock - the lock itself
-  if (typeof ko.NST.lock === 'undefined') ko.NST.lock = false;
-  /**
-   * Returns true if NST is found in left panel
-   * @returns {boolean}
-   */
-  this.NSTleft = function() {
-    var i, ls, l, t;
-    // we need to get elements again in case NST panel was moved
-    ls = NST.tabs.left = document.getElementById('project_toolbox_tabs');
-    l = NST.tabElements.left = NST.tabs.left.getElementsByTagName('tab');
-    t = NST.tab = document.getElementById('NST_tab');
-    for (i = 0; i < l.length; i++) if (l[i] === t) return true;
-    return false;
-  }
-  /**
-   * Fix for broken tab persistence
-   * @param {boolean} initFix
-   */
-  this.handleTabs = function(initFix) {
-    NST.init(1); // elements should be updated if a tab was moved
-    var i,
-        ls = NST.tabs.left, rs = NST.tabs.right, // left and right tabs elements
-        lsi = ls.selectedIndex, rsi = rs.selectedIndex, // tab element selected indices
-        l = NST.tabElements.left, r = NST.tabElements.right; // left and right tab element arrays
-    for (i = 0; i < l.length; i++) { // for each left panel tab (NST can be moved there)
-      document.persist(l[i].id, 'selected'); // we need to save its selected state
-      if (initFix && i == lsi && l[i] === NST.tab) { // if NST is seleced on start
-        ko.uilayout.ensureTabShown(l[i - 1].id, true); // the other tab is shown to force NST tab redraw
-        ko.uilayout.ensureTabShown('NST_tab', true); // and finally NST tab is shown
-      }
-    }
-    for (i = 0; i < r.length; i++) { // the same goes for the right panel
-      document.persist(r[i].id, 'selected');
-      if (initFix && i == rsi && r[i] === NST.tab) {
-        ko.uilayout.ensureTabShown(r[i - 1].id, true);
-        ko.uilayout.ensureTabShown('NST_tab', true);
-      }
-    }
-    // now we can store selected indices
-    document.persist('project_toolbox_tabs', 'selectedIndex');
-    document.persist('right_toolbox_tabs', 'selectedIndex');
-  };
   /**
    * Extension loader
    */
-  this.init = function() {
-    hook('komodo-ui-started', function() { // here we have window
-      if (!ko.NST.lock) {
-        main.settings.init(); // this loads defaults if ran for the first time
-        var overlay = main.settings.get('left') // yes, bottom panel is NOT SUPPORTED
-          ? 'chrome://NST/content/tree-l.xul' // left overlay or
-          : 'chrome://NST/content/tree-r.xul'; // right overlay
-        document.loadOverlay(overlay,
-                             { observe : function(subject, topic, data) {
-          if (topic == 'xul-overlay-merged') { // now we have overlay merged, but wait...
-            try {
-              if (!konsole.error)
-                alert('Shared library version conflict, ' +
-                      'please upgrade Uploader extension.');
-              main.settings.updateIcons(); // now it's done here
-              NST = new NSTClass();
-              main.handleTabs(1);
-              main.refresh('init');
-              hook('current_view_changed', function() { main.refresh('view'); });
-              hook('file_changed', function() { main.refresh('file'); });
-              if (main.settings.get('locate')) main.setAutoLocate(true);
-              // This happens when a tab is moved
-              document.addEventListener('DOMNodeInserted', function(event) {
-                // ...and if it's NST tab...
-                if (event.originalTarget.id == 'NSTviewbox') {
-                  main.handleTabs(1);
-                  main.settings.set('left', main.NSTleft());
-                  window.setTimeout(main.refresh, 100, false);
-                }
-              }, false);
-              // if we skip refresh when source tab is inactive, we have to...
-              NST.tab.addEventListener('focus', function() {
-                main.refresh('tab');
-              }, false);
-              var onToolboxUnloaded = ko.projects.onToolboxUnloaded;
-              ko.projects.onToolboxUnloaded = function() {
-                NST.hide();
-                ko.views.manager.currentView = undefined;
-                onToolboxUnloaded();
-              }
-            } catch(e) { konsole.error(e); }
-          }
-        }});
-        ko.NST.lock = true; // do not initialize it more than once!
+  this.load = function() {
+    try {
+      self = main;
+      self.settings.init(); // this loads defaults if ran for the first time
+      self.settings.updateIcons(); // now it's done here
+      NST = new NSTClass();
+      self._handle_num_views_changed_event = function(event) {
+          if (!ko.views.manager._viewCount) self.refresh();
+          self._handle_num_views_changed();
+      }        
+      self._handle_current_view_changed_event = function(event) {
+          self.refresh();            
+          self._handle_current_view_changed(event.originalTarget);            
       }
-    });
-    // let's ensure the tab settings are stored on exit:
-    addEventListener("unload", function() { main.handleTabs(0); }, false);
-  }();
-}).apply(extensions.NST);
+      hook('view_closed', self._handle_num_views_changed_event);
+      hook('current_view_changed', self._handle_current_view_changed_event);
+      hook('file_changed', function() { main.refresh(); });
+      if (self.settings.get('locate')) self.setAutoLocate(true);
+      self.refresh();
+    } catch(e) { debug(e); }
+  };
+  hook('load', function() { setTimeout(function() { main.load(); }, 3000); });
+}).apply(ko.extensions.NST);

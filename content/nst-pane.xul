@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<?xml-stylesheet href="chrome://komodo/skin" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/global/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/bindings/scrolltabs.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/bindings/sidebar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/bindings/views.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/bindings/widgets.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/toolbar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://komodo/skin/platform.css" type="text/css"?>
+<?xml-stylesheet href="chrome://NST/skin/default.css" type="text/css"?>
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="chrome://NST/content/NST.js" type="application/x-javascript"/>
+  <vbox flex="1" id="NST-vbox">
+    <hbox align="center" id="NST-tabpanel-hbox">
+      <toolbarbutton id="NST-toggle-locate"
+                     tooltiptext="Toggle automatic location of the current line"
+                     buttonstyle="pictures"
+                     class="toggleLocate-icon"
+                     oncommand="ko.extensions.NST.toggleLocate();"/>
+      <toolbarbutton id="NST-toggle-expand"
+                     tooltiptext="Toggle expand/collapse setting"
+                     buttonstyle="pictures"
+                     class="toggleExpand-icon"
+                     oncommand="ko.extensions.NST.toggleExpand();"/>
+      <toolbarbutton id="NST-toggle-sort"
+                     tooltiptext="Toggle tree ordering"
+                     buttonstyle="pictures"
+                     class="toggleSort-icon"
+                     oncommand="ko.extensions.NST.toggleSort();"/>
+      <toolbarbutton id="NST-toggle-HTMLfilter"
+                     tooltiptext="Toggle HTML filter"
+                     buttonstyle="pictures"
+                     class="toggleHTMLfilter-icon"
+                     oncommand="ko.extensions.NST.toggleHTMLfilter();"/>
+      <spacer/>
+      <textbox id="NST-search-text"
+               value=""
+               oninput="ko.extensions.NST.search();"
+               flex="1"
+               class="search-box"/>
+      <toolbarbutton id="NST-filter-classes-button"
+                     tooltiptext="Remove the filter"
+                     buttonstyle="pictures"
+                     class="sourceClearFilter"
+                     oncommand="ko.extensions.NST.removeFilter();"/>
+      <toolbarbutton id="NST-refresh-directory-button"
+                     tooltiptext="Reload tree"
+                     buttonstyle="pictures"
+                     class="refreshSource-icon"
+                     oncommand="ko.extensions.NST.refresh('button');"/>
+    </hbox>
+    <tree id="NST"
+          flex="1"
+          hidecolumnpicker="true"
+          hideheader="true"
+          flags="dont-build-content"
+          seltype="single"
+          style="-moz-user-focus:ignore">
+      <treecols>
+        <treecol flex="1" primary="true" hideheader="true"/>
+      </treecols>
+      <treechildren tooltip="NST-item-tooltip"
+                    onclick="ko.extensions.NST.go(event);"/>
+    </tree>
+    <tooltip id="NST-item-tooltip" noautohide="true" onpopupshowing="ko.extensions.NST.nodeInfo(event);">
+      <hbox><label id="NST-node-info" value=""></label></hbox>
+    </tooltip>
+  </vbox>
+</page>

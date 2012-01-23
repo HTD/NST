@@ -1,4 +1,4 @@
-#NST treechildren::-moz-tree-image() {
+#NST treechildren::-moz-tree-image {
   padding-right: 4px;
 }
 #NST treechildren::-moz-tree-cell-text(selected) {
@@ -78,16 +78,16 @@
   list-style-image: url('chrome://NST/skin/default/collapse.png');
 }
 .toggleLocate-icon {
-  list-style-image: url('chrome://komodo/skin/images/tree_select.png');
+  list-style-image: url('chrome://NST/skin/default/locate_node.png');
 }
 .toggleLocate-icon:hover {
-  list-style-image: url('chrome://komodo/skin/images/tree_select_hover.png');
+  list-style-image: url('chrome://NST/skin/default/locate_node_active.png');
 }
 .toggleLocate-icon.active {
-  list-style-image: url('chrome://komodo/skin/images/tree_select_hover.png');
+  list-style-image: url('chrome://NST/skin/default/locate_node_active.png');
 }
 .toggleLocate-icon.active:hover {
-  list-style-image: url('chrome://komodo/skin/images/tree_select.png');
+  list-style-image: url('chrome://NST/skin/default/locate_node.png');
 }
 .toggleHTMLfilter-icon {
   list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');

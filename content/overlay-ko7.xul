@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay id="overlay"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+    <ko-pane id="workspace_right_area">
+        <browser type="ko-widget"
+                 id="NST-viewbox"
+                 label="Source"
+                 src="chrome://NST/content/nst-pane.xul"/>
+    </ko-pane>
+</overlay>
