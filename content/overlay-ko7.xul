@@ -6,6 +6,7 @@
         <browser type="ko-widget"
                  id="NST-viewbox"
                  label="Source"
-                 src="chrome://NST/content/nst-pane.xul"/>
+                 src="chrome://NST/content/pane-nst.xul"
+                 tab_onfocus="ko.extensions.NST.refresh();"/>
     </ko-pane>
 </overlay>

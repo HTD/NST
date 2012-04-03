@@ -2,6 +2,7 @@
 <!DOCTYPE overlay PUBLIC "-//MOZILLA//DTD XUL V1.0//EN" "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 <?xml-stylesheet href="chrome://NST/skin/default.css" type="text/css"?>
 <overlay id="NSTOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<script src="chrome://xtk2/content/xtk2.js" type="application/x-javascript"/>
 <script src="chrome://NST/content/NST.js" type="application/x-javascript"/>
   <menupopup id="menu_view_tabs_popup">
     <menuitem id="show_NST_tab2"

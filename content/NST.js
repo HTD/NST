@@ -5,7 +5,6 @@
  *
  * Code Browser -like extension for Komodo Edit
  *
- * @version 0.59
  * @author Adam Łyskawa
  *
  * Contributors:
@@ -41,17 +40,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Komodo console in Output Window
-//xtk.load('chrome://NST/content/konsole.js');
-
-
-
-
 /**
  * Namespaces
  */
 if (typeof ko.extensions === 'undefined') ko.extensions = {};
-if (typeof ko.extensions.NST === 'undefined') ko.extensions.NST = { version : '0.59' };
+if (typeof ko.extensions.NST === 'undefined') ko.extensions.NST = { version : '0.60' };
 
 /**
  * Regular expressions quoting (from phpjs.org) used for comments
@@ -68,90 +61,6 @@ function preg_quote(str, delimiter) {
  * Extension code
  */
 (function () {
-  /**
-   * Services shortcuts
-   */
-  if (typeof(ko.services) == 'undefined')  ko.services = {};
-  /**
-   * OS Service shortcut
-   */
-  ko.services.os =
-    Components
-    .classes["@activestate.com/koOs;1"]
-    .getService(Components.interfaces.koIOs);
-  /**
-   * Preferences Service shortcut
-   */
-  ko.services.prefs =
-    Components
-    .classes["@activestate.com/koPrefService;1"]
-    .getService(Components.interfaces.koIPrefService);
-  /**
-   * Remote Connect Service shortcut
-   */
-  ko.services.rConnect =
-    Components
-    .classes["@activestate.com/koRemoteConnectionService;1"]
-    .getService(Components.interfaces.koIRemoteConnectionService);
-  /**
-   * Document Service shortcut
-   */
-  ko.services.doc =
-    Components
-    .classes["@activestate.com/koDocumentService;1"]
-    .getService(Components.interfaces.koIDocumentService);
-  /**
-   * Observer Service shortcut
-   */
-  ko.services.observer =
-    Components
-    .classes["@mozilla.org/observer-service;1"]
-    .getService(Components.interfaces.nsIObserverService);
-  /**
-   * System Utilities Service shortcut
-   */
-  ko.services.sys =
-    Components
-    .classes['@activestate.com/koSysUtils;1']
-    .getService(Components.interfaces.koISysUtils); 
-  var windowEvents = [
-    'codeintel_activated_window',
-    'codeintel_deactivated_window',
-    'current_view_changed',
-    'current_view_check_status',
-    'current_view_encoding_changed',
-    'current_view_language_changed',
-    'current_view_linecol_changed',
-    'load',
-    'view_closed',
-    'view_list_closed',
-    'view_opened'
-  ];
-  /**
-   * Hooks komodo events, to make life easier and code with style
-   * Inspired with DRY rule and Ockham's Razor
-   * To be updated to match further Komodo versions
-   * @param {string} events separated with space (jQuery style)
-   * @param {function} callback
-   */
-  var hook = function(events, callback) {
-    events = typeof events === 'string' ? events.split(' ') : events;
-    for (var i in events) {
-      if (windowEvents.indexOf(events[i]) < 0) // global events
-        ko.services.observer.addObserver({ observe : callback }, events[i], false);
-      else {
-        if (parent && parent.window) // Komodo 7 pane
-          parent.window.addEventListener(events[i], callback, false)
-        else // Main window context
-          window.addEventListener(events[i], callback, false); // window events
-      }
-    }
-  };
-  var debug = function(exception) {
-    alert('ERROR: ' + exception.message + '\n' +
-          'in line ' + exception.lineNumber + ' ' +
-          'of ' + exception.fileName + '.');
-  };
   ///
   /// Common constants
   ///
@@ -176,7 +85,9 @@ function preg_quote(str, delimiter) {
         TYPE_JQUERY_EXT       = 11,
         TYPE_TAG              = 12,
         TYPE_STYLE            = 13,
-        TYPE_AT_RULE          = 14;
+        TYPE_AT_RULE          = 14,
+        // Display name
+        NAME = 'NST';
   ///
   /// Extension scoped variables
   ///
@@ -317,7 +228,7 @@ function preg_quote(str, delimiter) {
       if (bc && bc.length) swc.push(preg_quote(bc[0]));
       for (i in lc) {
         swc.push(preg_quote(lc[i]));
-        lcre.push(new RegExp(lc[i] + '.*$', 'g'));
+        lcre.push(new RegExp('([^$0-9A-z\'"]|^)' + lc[i] + '.*$', 'g'));
       }
       swc = swc[0] + swc.slice(1).join('|') + ')';
     }(); // autostart
@@ -404,7 +315,7 @@ function preg_quote(str, delimiter) {
       if (this.blockComment) return false;
       /// line comment start matching
       for (i in lc) if (line.indexOf(lc[i]) >= 0)
-        line = line.replace(lcre[i], '');
+        line = line.replace(lcre[i], '$1');
       line = line.replace(/^\s+$/, '');
       /// defninition blocks matching
       if (defBlockParse) this.defBlockMatch(line, index);
@@ -1210,7 +1121,7 @@ function preg_quote(str, delimiter) {
       try {
 
         properties.AppendElement(this._icons[this.getNodeByRow(row).type]);
-      } catch(e) { debug(e); }
+      } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
     },
     /**
      * Gets rows tree level
@@ -1287,7 +1198,7 @@ function preg_quote(str, delimiter) {
         }
         this.tree.invalidateRow(row);
         this.mapRows();
-      } catch(e) { debug(e); }
+      } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
       finally {
         delete this._toggleOpenStateLock;
       }
@@ -1388,7 +1299,7 @@ function preg_quote(str, delimiter) {
         main.NST = this;
         main.NSTBox = this.source_tree.treeBoxObject;
         main.NSTView = this.sourceTreeView;
-      } catch (e) { debug(e); }
+      } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     },
     /**
      * Loads tree nodes into rows
@@ -1400,7 +1311,7 @@ function preg_quote(str, delimiter) {
                             ? filteredNodes
                             : CodeParser.nodeList.nodes);
         if (main.settings.get('expand')) this.sourceTreeView.toggleOpenAll();
-      } catch (e) { debug(e); }
+      } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     },
     /**
      * Sorts tree nodes by type, then by name
@@ -1418,7 +1329,7 @@ function preg_quote(str, delimiter) {
               else return 1;
             }
           });
-      } catch(e) { debug(e); }
+      } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
     },
     /**
      * Filters tree
@@ -1439,7 +1350,7 @@ function preg_quote(str, delimiter) {
             delete nodes[i];
         if (nodes) this.loadTree(nodes); else return false;
         return true;
-      } catch (e) { debug(e); return false; }
+      } catch (e) { xtk2.debug.exceptionHandler(e, NAME); return false; }
     },
     /**
      * Reload feature
@@ -1454,7 +1365,7 @@ function preg_quote(str, delimiter) {
         if (!this.filterTree()) this.loadTree();
         if (main.settings.get('locate')) main.locateLine();
         this.viewChanged = false;
-      } catch (e) { debug(e); }
+      } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     }
   };
   /**
@@ -1494,7 +1405,7 @@ function preg_quote(str, delimiter) {
         v.setFocus();
         ko.commands.doCommand('cmd_editCenterVertically');
       }
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     return false;
   };
   /**
@@ -1507,7 +1418,7 @@ function preg_quote(str, delimiter) {
           i =  NST.node_info;
       if (n && n.info) i.value = n.info;
       else event.preventDefault();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   /**
    * Locates current line in source tree
@@ -1536,18 +1447,19 @@ function preg_quote(str, delimiter) {
       if (r - m < 1) b.scrollToRow(0);
       else if (r + m > v._rows.length) b.scrollToRow(v._rows.length - h);
       else b.scrollToRow(r - m);
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   /**
    * Sets line auto-locate feature
    */
   this.setAutoLocate = function(state) {
+    var w = parent && parent.window ? parent.window : window;
     if (state) {
-      window.addEventListener('click', main.locateLine, false);
-      window.addEventListener('keyup', main.locateLine, false);
+      w.addEventListener('click', main.locateLine, false);
+      w.addEventListener('keyup', main.locateLine, false);
     } else {
-      window.removeEventListener('click', main.locateLine, false);
-      window.removeEventListener('keyup', main.locateLine, false);
+      w.removeEventListener('click', main.locateLine, false);
+      w.removeEventListener('keyup', main.locateLine, false);
     }
   };
   /**
@@ -1558,13 +1470,13 @@ function preg_quote(str, delimiter) {
       var s = this.settings.change('locate');
       this.setAutoLocate(s);
       if (s) this.locateLine();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   this.toggleHTMLfilter = function() {
     try {
       var s = this.settings.change('HTMLfilter');
       this.refresh();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   }
   /**
    * Refresh button handler
@@ -1588,7 +1500,7 @@ function preg_quote(str, delimiter) {
         }
         NST.reloadSource();
       } else NST.init();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   /**
    * Toggles tree sorting
@@ -1598,7 +1510,7 @@ function preg_quote(str, delimiter) {
     try {
       this.settings.change('sort');
       this.refresh();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   /**
    * Removes search filter from displayed tree
@@ -1610,7 +1522,7 @@ function preg_quote(str, delimiter) {
       t.search_box.value = '';
       t.loadTree();
     } catch (e) {
-      debug(e);
+      xtk2.debug.exceptionHandler(e, NAME);
     }
   };
   /**
@@ -1621,7 +1533,7 @@ function preg_quote(str, delimiter) {
     try {
       var t = NST;
       if (t.search_box.value) t.filterTree(); else t.loadTree();
-    } catch (e) { debug(e); }
+    } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
   /**
    * Extension settings module
@@ -1667,14 +1579,14 @@ function preg_quote(str, delimiter) {
      * @returns {boolean}
      */
     get : function(name) {
-      return ko.services.prefs.prefs.getBooleanPref('extensions.NST.' + name);
+      return xtk2.services.prefs.prefs.getBooleanPref('extensions.NST.' + name);
     },
     /**
      * Save a boolean setting to extension prefs
      * @param {string} name
      */
     set : function(name, value) {
-      ko.services.prefs.prefs.setBooleanPref('extensions.NST.' + name, value);
+      xtk2.services.prefs.prefs.setBooleanPref('extensions.NST.' + name, value);
     },
     /**
      * Changes a boolean setting in extension prefs
@@ -1702,7 +1614,7 @@ function preg_quote(str, delimiter) {
      */
     init : function() {
       for (var p in this.defaults) {
-        if (!ko.services.prefs.prefs.hasBooleanPref('extensions.NST.' + p))
+        if (!xtk2.services.prefs.prefs.hasBooleanPref('extensions.NST.' + p))
           this.set(p, this.defaults[p]);
       }
     }
@@ -1712,24 +1624,23 @@ function preg_quote(str, delimiter) {
    */
   this.load = function() {
     try {
-      self = main;
-      self.settings.init(); // this loads defaults if ran for the first time
-      self.settings.updateIcons(); // now it's done here
+      main.settings.init(); // this loads defaults if ran for the first time
+      main.settings.updateIcons(); // now it's done here
       NST = new NSTClass();
-      self._handle_num_views_changed_event = function(event) {
-          if (!ko.views.manager._viewCount) self.refresh();
-          self._handle_num_views_changed();
-      }        
-      self._handle_current_view_changed_event = function(event) {
-          self.refresh();            
-          self._handle_current_view_changed(event.originalTarget);            
-      }
-      hook('view_closed', self._handle_num_views_changed_event);
-      hook('current_view_changed', self._handle_current_view_changed_event);
-      hook('file_changed', function() { main.refresh(); });
-      if (self.settings.get('locate')) self.setAutoLocate(true);
-      self.refresh();
-    } catch(e) { debug(e); }
+      xtk2.events.bind(
+        ['current_view_changed',
+         'current_project_changed',
+         'current_view_language_changed',
+         'file_changed'],
+        main.refresh
+      );
+      xtk2.events.view_closed(function(event) {
+        // if no more views - this removes the last source from the tree
+        if (!ko.views.manager._viewCount) self.refresh();
+      });
+      if (main.settings.get('locate')) main.setAutoLocate(true);
+      main.refresh();
+    } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
-  hook('load', function() { setTimeout(function() { main.load(); }, 3000); });
+  xtk2.events.load_delayed(main.load);
 }).apply(ko.extensions.NST);
