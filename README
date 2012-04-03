@@ -3,7 +3,7 @@ Code Browser -like extension for Komodo Edit
 by Adam Łyskawa
 
 Contributors:
-Sergey Lerg (LUA parser)
+See content/NST.js
 
 -----------
 -- Notes --
@@ -17,7 +17,7 @@ Please document your changes using JSDoc syntax.
 -------------------
 -- License (BSD) --
 -------------------
-Copyright (c) 2010-2011, Adam Łyskawa
+Copyright (c) 2010-2012, Adam Łyskawa
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

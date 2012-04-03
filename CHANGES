@@ -1,0 +1,15 @@
+Recent changes (since 0.60):
+
+- xtk2 (Komodo Extension Toolkit 2) used
+  it's the common code base for all my extensions, designed similar to
+  Activestate's xtk,
+
+- line comment matching changed in Preprocessor._init() and .parse() methods
+  to exclude strings like $# or x# from being matched as line comment start,
+  
+- README updated,
+
+- version references now only in install.rdf and content/NST.js line 47
+  (version string),
+  
+- CHANGES file added.
