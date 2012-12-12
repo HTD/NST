@@ -181,6 +181,12 @@ function preg_quote(str, delimiter) {
       if (typeof(n) == 'undefined') n = 1;
       for (var i = 0; i < n; i++) this.parents.pop();
     };
+    /**
+     * Ends all nesting levels
+     */
+    this.zeroIdentation = function() {
+      this.parents = [0];
+    };
   };
   /**
    * Common line preprocessor
@@ -826,6 +832,520 @@ function preg_quote(str, delimiter) {
     };
   };
   /**
+   * Simplify strings for Perl and Ruby
+   */
+  StringSimplifier = function(config) {
+    var self = this; // this access for private functions
+
+    this.wait_for_quote = null;
+    this.wait_for_quote_list = [];
+    this.wait_for_string_end_rx = null;
+    this.wait_for_string_end_rx_ternary = null;
+
+    var BRACE_PAIR = {
+      '[' : ']',
+      '(' : ')',
+      '{' : '}',
+      '<' : '>',
+    };
+
+    this.START_QUOTES_RX_LIST = config.START_QUOTES_RX_LIST;
+    this.TERNARY = config.TERNARY;
+    this.PRESERVE_1 = config.PRESERVE_1;
+    this.COMMENT_RX_INDEX = config.COMMENT_RX_INDEX;
+    this.HEREDOC_RX_INDEXES = config.HEREDOC_RX_INDEXES;
+    this.END_DOCUMENT_RX = config.END_DOCUMENT_RX;
+    this.NO_SUCH_STRING_RX = config.NO_SUCH_STRING_RX;
+    this.START_DOCUMENTATION_RX = config.START_DOCUMENTATION_RX;
+    this.END_DOCUMENTATION_RX = config.END_DOCUMENTATION_RX;
+    this.HEREDOC_SPACE_ALLOWED = config.HEREDOC_SPACE_ALLOWED;
+
+    var escape_regex = function(str) {
+      return str.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&" );
+    };
+
+    var regex_to_string = function(rx) {
+      rx += '';
+      return rx.replace(/^\//,'')
+        .replace(/\/$/,'');
+    };
+
+    // in one line due to bug in NST JS parser
+    var get_multiline_regex = function(start_regex) {
+      return new RegExp( regex_to_string(start_regex) + '.*$' );
+    };
+
+    var get_matching_pairs_of_delimeters_rx = function( start, end, depth, no_start ) {
+      // no recursive regexes in js =(
+      var rx_begin = '\\'+start+'(?:\\\\[^\\\\]|[^'+start+end+'\\\\]|\\\\\\\\';
+      var rx_end = ')*\\'+end;
+
+      var rx_string = '';
+      if (depth) {
+        rx_string = rx_begin + rx_end;
+        for ( var i=1; i<depth; i++ ) {
+          rx_string = rx_begin + '|' + rx_string + rx_end
+        }
+        if (no_start) {
+          rx_string = rx_string.replace( '\\'+start, '' );
+        }
+      }
+
+      return rx_string;
+    }
+
+    var get_single_delimeter_rx = function( start, no_start ) {
+      var rx_string = '(?:\\\\[^' + start + '\\\\]|[^' + start + '\\\\]|'
+        + '\\\\\\\\|\\\\' + escape_regex(start)
+        + ')*' + escape_regex(start);
+
+      return no_start
+        ? rx_string
+        : escape_regex(start) + rx_string;
+    }
+
+    var get_singleline_regex = function( start_regex, start, end, ternary ) {
+      var singleline_regex_text = regex_to_string(start_regex);
+
+      if ( start == end ) {
+        var middle_end = get_single_delimeter_rx( start, 1 );
+        if (ternary) {
+          singleline_regex_text += middle_end + middle_end;
+        }
+        else {
+          singleline_regex_text += middle_end;
+        }
+      }
+      else {
+        if (ternary) {
+          singleline_regex_text
+            += get_matching_pairs_of_delimeters_rx( start, end, 4, 1 )
+            +  get_matching_pairs_of_delimeters_rx( start, end, 4, 0 );
+        }
+        else {
+          singleline_regex_text
+            += get_matching_pairs_of_delimeters_rx( start, end, 4, 1 );
+        }
+      }
+
+      return new RegExp( singleline_regex_text );
+    };
+
+    this.simplify = function(line) {
+      if ( self.wait_for_quote ) {
+        if ( line.match(self.wait_for_quote) ) {
+          self.wait_for_quote = self.wait_for_quote_list.shift();
+        }
+        line = '';
+      }
+      else if ( self.wait_for_string_end_rx ) {
+        if ( line.match( self.wait_for_string_end_rx ) ) {
+          line = line.replace( self.wait_for_string_end_rx, '' );
+          self.wait_for_string_end_rx = null;
+          if ( self.wait_for_string_end_rx_ternary ) {
+            self.wait_for_string_end_rx = self.wait_for_string_end_rx_ternary;
+            self.wait_for_string_end_rx_ternary = null;
+            if ( line.match( self.wait_for_string_end_rx ) ) {
+              line = line.replace( self.wait_for_string_end_rx, '' );
+              self.wait_for_string_end_rx = null;
+            }
+            else {
+              line = '';
+            }
+          }
+        }
+        else {
+          line = '';
+        }
+      }
+
+      if ( !self.wait_for_quote && !self.wait_for_string_end_rx && line != '' ) {
+        if ( line.match( self.END_DOCUMENT_RX ) ) {
+          self.wait_for_quote = self.NO_SUCH_STRING_RX; // no data till eof
+          line = '';
+        }
+        else if ( line.match(self.START_DOCUMENTATION_RX) ) {
+          self.wait_for_quote = self.END_DOCUMENTATION_RX;
+          line = '';
+        }
+        else {
+          while (1) {
+            var first_match_index = null;
+            var first_match_position = Infinity;
+            for ( var i=0; i<self.START_QUOTES_RX_LIST.length; i++ ) {
+              var regex = self.START_QUOTES_RX_LIST[i];
+              var match_arr = line.match(regex);
+              if ( match_arr ) {
+                var match_text = match_arr[2];
+                var position = line.indexOf(match_text);
+                if ( i == self.COMMENT_RX_INDEX && match_text.charAt(0) != '#' ) {
+                  position++;
+                }
+                if ( position < first_match_position ) {
+                  first_match_position = position;
+                  first_match_index = i;
+                }
+              }
+            }
+
+            if ( first_match_index != null ) {
+              if ( first_match_index == self.COMMENT_RX_INDEX ) {
+                line = line.substring(0,first_match_position);
+              }
+              else if ( self.HEREDOC_RX_INDEXES[first_match_index] ) {
+                var start_regex = self.START_QUOTES_RX_LIST[first_match_index];
+                var match_arr = start_regex.exec(line);
+                var space = self.HEREDOC_SPACE_ALLOWED[first_match_index] ? '\\s*' : '';
+                var new_regex = new RegExp(
+                  '^' + space + regex_to_string(match_arr[4]) + '$'
+                );
+                if ( self.wait_for_quote ) {
+                  self.wait_for_quote_list.push( new_regex );
+                }
+                else {
+                  self.wait_for_quote = new_regex;
+                }
+                line = line.replace(start_regex,"$1\0");
+              }
+              else {
+                var start_regex = self.START_QUOTES_RX_LIST[first_match_index];
+                var match_arr = start_regex.exec(line);
+                var start_of_string = match_arr[3];
+                var end_of_string = BRACE_PAIR[start_of_string]
+                  ? BRACE_PAIR[start_of_string]
+                  : start_of_string;
+
+                var singleline_regex = get_singleline_regex(
+                  start_regex, start_of_string, end_of_string,
+                  self.TERNARY[first_match_index] );
+
+                if ( line.match(singleline_regex) ) {
+                  line = line.replace(singleline_regex,
+                    self.PRESERVE_1[first_match_index] ? "$1\0" : "\0"
+                  );
+                }
+                else {
+                  if (self.TERNARY[first_match_index]) {
+                    var middle = start_of_string == end_of_string
+                      ? end_of_string // for non pair characters
+                      : end_of_string + start_of_string; // for pair charecters '}{'
+                    self.wait_for_string_end_rx = new RegExp(
+                      '^.*?' + escape_regex(middle)
+                    );
+                    self.wait_for_string_end_rx_ternary = new RegExp(
+                      '^.*?' + escape_regex(end_of_string)
+                    );
+                  }
+                  else {
+                      self.wait_for_string_end_rx = new RegExp(
+                        '^(?:[^'
+                          + escape_regex(end_of_string) + '\\\\]|[^\\\\]\\\\'
+                          + escape_regex(end_of_string) + ')*?'
+                          + escape_regex(end_of_string)
+                      );
+                  }
+
+                  var multiline_regex = get_multiline_regex(start_regex);
+                  line = line.replace(multiline_regex,
+                    self.PRESERVE_1[first_match_index] ? "$1\0" : "\0"
+                  );
+                }
+                // BUG: if delimeter is one of the "{[<("
+                // in string can be balansed pairs of delimeter character (no escaping)
+                // solved only for singleline strings
+                // it is too complex to parse multilines
+              }
+            }
+            else {
+              break;
+            }
+          }
+        }
+      }
+      line = line.replace( /\0/g, "''" );
+      return line;
+    };
+  };
+  /**
+   * Line parser for Ruby
+   */
+  LineParserRuby = function() {
+    var self = this; // this access for private functions
+    this.index = -1; // processed line number
+    this.text = null;
+    this.info = null;
+    this.type = TYPE_UNKNOWN; // set to TYPE_CLASS or TYPE_FUNCTION
+    var id = '[a-zA-Z][a-zA-Z0-9_.]*[!?]?', // identifier match
+        pp = new Preprocessor(id, ['#'], [], 'Ruby'); // preprocessor instance
+    this.open = true;
+    this.current_visibility = TYPE_PUBLIC;
+
+    this.string_simplifier = new StringSimplifier({
+      'START_QUOTES_RX_LIST' : [
+        /(((?:^|[^$])#))/, // comments
+        /()(<<(['"])(.*?)\3)/, // quoted heredoc
+        /(^|[,=\(]\s*)(<<(((?:[^-=][^\s"']*)?))(?=[,;]?(?:$|\s)))/, // bare heredoc
+        /()(<<-(['"])(.*?)\3)/, // quoted heredoc with leading "-"
+        /()(<<-(((?:[^-=][^\s"']*)?))(?=[,;]?(?:$|\s)))/, // bare heredoc with leading "-"
+        /(((['"`])))/, // simple quotes
+        /((?:^|[^\w\s\/]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
+        /(^|[^$@%])((?:%[qQr]?)([^qQr{\[(<\w\s]))/, // q-quotes
+        /(^|[^$@%])((?:%[qQr]?)( ))/, // %-quotes with ' ' delimeter
+        /(^|[^$@%])((?:%[qQr]?)(\{))/, // %-quotes with "{}" delimeters
+        /(^|[^$@%])((?:%[qQr]?)(\[))/, // %-quotes with "[]" delimeters
+        /(^|[^$@%])((?:%[qQr]?)(\())/, // %-quotes with "()" delimeters
+        /(^|[^$@%])((?:%[qQr]?)(\<))/, // %-quotes with "<>" delimeters
+      ],
+      'TERNARY' : [
+        false, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        null, // quoted heredoc with leading "-"
+        null, // bare heredoc with leading "-"
+        false, // simple quotes
+        false, // regex delimeter
+        false, // q-quotes
+        false, // %-quotes with ' ' delimeter
+        false, // %-quotes with "{}" delimeters
+        false, // %-quotes with "[]" delimeters
+        false, // %-quotes with "()" delimeters
+        false, // %-quotes with "<>" delimeters
+      ],
+      'PRESERVE_1' : [
+        null, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        null, // quoted heredoc with leading "-"
+        null, // bare heredoc with leading "-"
+        false, // simple quotes
+        true, // regex delimeter
+        true, // %-quotes
+        true, // %-quotes with ' ' delimeter
+        true, // %-quotes with "{}" delimeters
+        true, // %-quotes with "[]" delimeters
+        true, // %-quotes with "()" delimeters
+        true, // %-quotes with "<>" delimeters
+      ],
+      'COMMENT_RX_INDEX' :       0, // no look behind in js regexes =(
+      'HEREDOC_RX_INDEXES' :     [ null, 1, 1, 1, 1 ],
+      'HEREDOC_SPACE_ALLOWED' :  [ null, false, false, true, true ],
+      'END_DOCUMENT_RX' :        /^__END__$/,
+      'NO_SUCH_STRING_RX' :      /$no-such-string^/,
+      'START_DOCUMENTATION_RX' : /^=begin\b/,
+      'END_DOCUMENTATION_RX' :   /^=end$/,
+    });
+
+    var STATIC_PAIR = {};
+    STATIC_PAIR[TYPE_PRIVATE]   = TYPE_PRIVATE_STATIC;
+    STATIC_PAIR[TYPE_PUBLIC]    = TYPE_PUBLIC_STATIC;
+    STATIC_PAIR[TYPE_PROTECTED] = TYPE_PROTECTED_STATIC;
+
+    this.depth_in_blocks = new Array();
+    this.current_depth_in_blocks = 0;
+    var next_depth = function() {
+      self.depth_in_blocks.push( self.current_depth_in_blocks );
+      self.current_depth_in_blocks = 0;
+      return null;
+    };
+    var prev_depth = function() {
+      self.current_depth_in_blocks = self.depth_in_blocks.pop();
+      return null;
+    };
+    var inc_depth = function() {
+      self.current_depth_in_blocks++;
+      return null;
+    };
+    var dec_depth = function() {
+      self.current_depth_in_blocks--;
+      if ( self.current_depth_in_blocks < 0 ) {
+        prev_depth();
+        return -1;
+      }
+      else {
+        return self.current_depth_in_blocks;
+      }
+    };
+
+    this.parse = function(line, index) {
+      line = self.string_simplifier.simplify(line);
+      self.text = undefined; // initial state (for empty lines / unmatched)
+      self.type = undefined; // initial state (for empty lines / unmatched)
+      self.info = undefined;
+      self.open = true;
+      line = pp.parse(line, index, true); if (!line) return;
+      var parts = line.match(/^\s*(.*?)\s*?$/), // main parts of the line
+        code = parts[1];
+      self.index = pp.defBlockReady ? (1 * pp.defBlockStart) : (1 * index);
+      // non-empty nodes:
+      if (code) {
+        if ( code.match(/^(?:class|module)\s*<</) ) {
+          inc_depth();
+        }
+        else if ((parts = code.match(/^(?:class|module) \s*(\S+)/))) {
+          self.text = parts[1];
+          self.type = TYPE_CLASS;
+          next_depth();
+        }
+        else if ((parts = code.match(/^def \s*([^\s\(]+)/))) {
+          self.text = parts[1];
+          self.type = self.current_visibility;
+          if ((parts = self.text.match(/^self\.(.+)$/))) {
+            self.text = parts[1];
+            self.type = STATIC_PAIR[self.current_visibility];
+          }
+          else if ( self.text.match(/^[A-Z][^.\s]+\..+$/) ) {
+            self.type = STATIC_PAIR[self.current_visibility];
+          }
+          next_depth();
+        }
+        else if ( code.match(/\s+do\b(?:\s*\|[a-zA-Z0-9_ \t,]*\|)?$/) ) {
+          inc_depth();
+        }
+        else if ( code.match(/^(if|unless|case)\b/) ) {
+          inc_depth();
+        }
+        else if ( code.match(/\bbegin$/) ) {
+          inc_depth();
+        }
+        else if ( code.match(/^end$/) ) {
+          var depth = dec_depth();
+          if ( depth == -1 ) {
+            self.open = false;
+          }
+        }
+        else if ( code.match(/^private$/) ) {
+          self.current_visibility = TYPE_PRIVATE;
+        }
+        else if ( code.match(/^public$/) ) {
+          self.current_visibility = TYPE_PUBLIC;
+        }
+        else if ( code.match(/^protected$/) ) {
+          self.current_visibility = TYPE_PROTECTED;
+        }
+        self.info = self.text;
+      }
+    };
+  };
+  /**
+   * Line parser for Perl
+   */
+  LineParserPerl = function() {
+    var self = this; // this access for private functions
+
+    this.index = -1;
+    this.text = null; // node text
+    this.type = TYPE_UNKNOWN; // node type
+    this.open = true; // if the node is open container for other nodes
+    this.removeLast = false; // if last node didn't match the brace required
+    this.zeroIdentation = false;
+
+    this.js_parser = new LineParserJS('Perl',
+                                 ['package name'],
+                                 ['*\\bsub name',
+                                  '*\\bsub name()'],
+                                 '[&a-zA-Z_][a-zA-Z0-9_\\:]*',
+                                 []);
+
+    this.string_simplifier = new StringSimplifier({
+      'START_QUOTES_RX_LIST' : [
+        /(((?:^|[^$])#))/, // comments
+        /()(<<(['"])(.*?)\3)/, // quoted heredoc
+        /()(<<((\S*?))(?=[,;]?(?:$|\s)))/, // bare heredoc
+        /(((['"`])))/, // simple quotes
+        /((?:^|[^\w\s\/]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
+        /(^|[^$@%&])\b((?:q[qxwr]?|m)([^qxwr{\[(<\w\s]))/, // q-quotes, match
+        /(^|[^$@%&])\b((?:q[qxwr]?|m) (\w))/, // q-quotes, match with alphabetic delimeters
+        /(^|[^$@%&])\b((?:q[qxwr]?|m)(\{))/, // q-quotes, match with "{}" delimeters
+        /(^|[^$@%&])\b((?:q[qxwr]?|m)(\[))/, // q-quotes, match with "[]" delimeters
+        /(^|[^$@%&])\b((?:q[qxwr]?|m)(\())/, // q-quotes, match with "()" delimeters
+        /(^|[^$@%&])\b((?:q[qxwr]?|m)(\<))/, // q-quotes, match with "<>" delimeters
+        /(^|[^$@%&])\b((?:s|tr|y)([^{\[(<\w\s]))/, // s/tr/y
+        /(^|[^$@%&])\b((?:s|tr|y) (\w))/, // s/tr/y with alphabetic delimeters
+        /(^|[^$@%&])\b((?:s|tr|y)(\{))/, // s/tr/y with "{}{}" delimeters
+        /(^|[^$@%&])\b((?:s|tr|y)(\())/, // s/tr/y with "()()" delimeters
+        /(^|[^$@%&])\b((?:s|tr|y)(\[))/, // s/tr/y with "[][]" delimeters
+        /(^|[^$@%&])\b((?:s|tr|y)(\<))/, // s/tr/y with "<><>" delimeters
+      ],
+      'TERNARY' : [
+        false, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        false, // simple quotes
+        false, // regex delimeter
+        false, // q-quotes, match
+        false, // q-quotes, match with alphabetic delimeters
+        false, // q-quotes, match with "{}" delimeters
+        false, // q-quotes, match with "[]" delimeters
+        false, // q-quotes, match with "()" delimeters
+        false, // q-quotes, match with "<>" delimeters
+        true, // s/tr/y
+        true, // s/tr/y with alphabetic delimeters
+        true, // s/tr/y with "{}{}" delimeters
+        true, // s/tr/y with "()()" delimeters
+        true, // s/tr/y with "[][]" delimeters
+        true, // s/tr/y with "<><>" delimeters
+      ],
+      'PRESERVE_1' : [
+        null, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        false, // simple quotes
+        true, // regex delimeter
+        true, // q-quotes, match
+        true, // q-quotes, match with alphabetic delimeters
+        true, // q-quotes, match with "{}" delimeters
+        true, // q-quotes, match with "[]" delimeters
+        true, // q-quotes, match with "()" delimeters
+        true, // q-quotes, match with "<>" delimeters
+        true, // s/tr/y
+        true, // s/tr/y with alphabetic delimeters
+        true, // s/tr/y with "{}{}" delimeters
+        true, // s/tr/y with "()()" delimeters
+        true, // s/tr/y with "[][]" delimeters
+        true, // s/tr/y with "<><>" delimeters
+      ],
+      'COMMENT_RX_INDEX' :       0, // no look behind in js regexes =(
+      'HEREDOC_RX_INDEXES' :     [ null, 1, 1 ],
+      'HEREDOC_SPACE_ALLOWED' :  [ null, false, false ],
+      'END_DOCUMENT_RX' :        /^__(?:END|DATA)__$/,
+      'NO_SUCH_STRING_RX' :      /$no-such-string^/,
+      'START_DOCUMENTATION_RX' : /^=\S/,
+      'END_DOCUMENTATION_RX' :   /^=cut$/,
+    });
+
+    this.parse = function(line, index) {
+      line = self.string_simplifier.simplify(line);
+      var result = self.js_parser.parse( line, index );
+
+      self.zeroIdentation = false;
+      self.index = self.js_parser.index;
+      self.text = self.js_parser.text;
+      self.type = self.js_parser.type;
+      self.open = self.js_parser.open;
+      self.removeLast = self.js_parser.removeLast;
+
+      if ( self.text != null ) {
+        if ( self.type == TYPE_CLASS ) {
+          self.zeroIdentation = true;
+        }
+        else if ( self.type == TYPE_FUNCTION ) {
+          if ( line.match(/sub\s+[\w:]+\s*\([\s$@%;\\]*\)\s*;/) ) { // prototypes
+            self.open = false;
+            self.type = TYPE_PROTOTYPE
+          }
+          else if ( self.text.match(/^_/) ) { // convention from Perl Best Practices
+            self.type = TYPE_PRIVATE;
+          }
+          else {
+            self.type = TYPE_PUBLIC;
+          }
+        }
+      }
+
+      return result;
+    };
+  };
+  /**
    * Code parser, hack languages here:
    */
   CodeParser = {
@@ -894,12 +1414,7 @@ function preg_quote(str, delimiter) {
                                  ['#', '//']);
             break;
           case 'Perl':
-            p = new LineParserJS(self.lang,
-                                 ['package name'],
-                                 ['*\\bsub name',
-                                  '*\\bsub name()'],
-                                 '[&a-zA-Z_][a-zA-Z0-9_\\:]*',
-                                 ['#']);
+            p = new LineParserPerl();
             break;
           case 'Python':
             p = new LineParserPython();
@@ -930,6 +1445,9 @@ function preg_quote(str, delimiter) {
                                   '[\*a-zA-Z_][.a-zA-Z0-9_:]*',
                                  ['//'],
                                  ['/*', '*/']);
+            break;
+          case 'Ruby':
+            p = new LineParserRuby();
             break;
         }
       }(this);
@@ -977,6 +1495,7 @@ function preg_quote(str, delimiter) {
                 n.end();
               }
               else {
+                if (p.zeroIdentation) n.zeroIdentation();
                 if (p.text) id = n.add(p.text, p.index + 1, p.type, p.info);
                 if (!p.open) n.end();
               }
