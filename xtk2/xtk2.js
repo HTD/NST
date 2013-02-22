@@ -378,19 +378,6 @@ xtk2.events.load = function(fn, delay) {
 };
 
 /**
- * Binds a handler to a delayed load event
- * @param {function} fn
- * @param {number} delay in milliseconds, default 3000
- */
-xtk2.events.load_delayed = function(fn, delay) {
-    alert('load_delayed()!');
-    if (typeof delay === 'undefined') delay = 3000;
-    xtk2.events.bind('load', function() {
-        setTimeout(fn, delay);
-    });
-};
-
-/**
  * Binds a handler to view_closed event or triggers it
  * @param {function} fn
  */
