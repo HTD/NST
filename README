@@ -5,6 +5,27 @@ by Adam Łyskawa
 Contributors:
 See content/NST.js
 
+PLEASE - UPDATE COMMENT IN content/NST.js, or I could miss your contribution
+on ActiveState Community website! And I don't want to!
+
+Since I'm too busy with my current work to update NST, please feel free to
+update the code as you like, fix bugs, implement new features.
+
+Then test it, e-mail me it works and I'll release it as new version
+on ActiveState Community website.
+
+You don't need to fork the project, if you need anything, like privileges,
+just ask. I don't use GIT everyday, so I don't even know how to grant them,
+but I'll find it out.
+
+I would love NST to become community project. It's my "baby", but I can't
+find time to develop it anymore. Maybe if I ever change my job to more
+related with what NST does or how it works...
+
+http://www.youtube.com/watch?v=dj2nqILbPdA
+
+Thank you for all the support. Feel free to change this README too.
+
 -----------
 -- Notes --
 -----------
@@ -12,7 +33,13 @@ See content/NST.js
 Please don't change code formatting:
 2 spaces for indentation, opening braces on the same line.
 
+Or if you convinced 4 spaces indentation would look more
+readable (well, we have bigger screens now) - change the indentation
+globally in each file, let it be consistent at least.
+
 Please document your changes using JSDoc syntax.
+
+THANK YOU.
 
 -------------------
 -- License (BSD) --

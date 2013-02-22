@@ -3,3 +3,4 @@ Recent changes (since 0.61):
 - Komodo 8 compatibility achieved by:
   replacing xtk2.events.load_delayed() with window.setTimeout() and
   removing line 2014: if (!ko.uilayout.isTabShown('NST-viewbox')) return; - since ko.uilayout.isTabShown('NST-viewbox') doesn't work anymore in Komodo 8
+- README :)
