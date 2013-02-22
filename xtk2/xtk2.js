@@ -383,6 +383,7 @@ xtk2.events.load = function(fn, delay) {
  * @param {number} delay in milliseconds, default 3000
  */
 xtk2.events.load_delayed = function(fn, delay) {
+    alert('load_delayed()!');
     if (typeof delay === 'undefined') delay = 3000;
     xtk2.events.bind('load', function() {
         setTimeout(fn, delay);

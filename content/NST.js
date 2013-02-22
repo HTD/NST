@@ -2010,7 +2010,8 @@ function preg_quote(str, delimiter) {
         if (!NST) NST = new NSTClass();
         // Here we prevent reloading when source tree is not visible:
         if (typeof ko.uilayout.isTabShown === 'function') { // Komodo 7 way
-          if (!ko.uilayout.isTabShown('NST-viewbox')) return;
+          // FOLLOWING LINE DOESN'T WORK WITH KOMODO 8!!!
+          //if (!ko.uilayout.isTabShown('NST-viewbox')) return;
         } else { // Komodo 6 way
           var t = document.getElementById('NST_tab');
           if (!t || !t.parentNode.selectedItem ||
@@ -2161,5 +2162,5 @@ function preg_quote(str, delimiter) {
       main.refresh();
     } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
   };
-  xtk2.events.load_delayed(main.load);
+  window.setTimeout(main.load, 1000, false);
 }).apply(ko.extensions.NST);
