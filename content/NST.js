@@ -1449,6 +1449,14 @@ function preg_quote(str, delimiter) {
           case 'Ruby':
             p = new LineParserRuby();
             break;
+          case 'Bash':
+            p = new LineParserJS(self.lang,
+                                 [''],
+                                 ['*function name() {',
+                                  'name() {'],
+                                  '[&$a-żA-Ż_][a-żA-Ż0-9_]*',
+                                 ['#']);
+            break;
         }
       }(this);
       /**
