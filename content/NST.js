@@ -1201,17 +1201,17 @@ function preg_quote(str, delimiter) {
         else if ( code.match(/\s+do\b(?:\s*\|[a-zA-Z0-9_ \t,]*\|)?$/) ) {
           inc_depth();
         }
-        else if ( code.match(/^(if|unless|case)\b/) ) {
-          inc_depth();
-        }
         else if ( code.match(/\bbegin$/) ) {
           inc_depth();
         }
-        else if ( code.match(/^end$/) ) {
+        else if ( code.match(/^end\b/) ) {
           var depth = dec_depth();
           if ( depth == -1 ) {
             self.open = false;
           }
+        }
+        else if ( code.match(/^(if|unless|case|while)\b/) ) {
+          inc_depth();
         }
         else if ( code.match(/^private$/) ) {
           self.current_visibility = TYPE_PRIVATE;
