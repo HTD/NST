@@ -1037,12 +1037,13 @@ function preg_quote(str, delimiter) {
                     );
                   }
                   else {
-                      self.wait_for_string_end_rx = new RegExp(
-                        '^(?:[^'
-                          + escape_regex(end_of_string) + '\\\\]|[^\\\\]\\\\'
-                          + escape_regex(end_of_string) + ')*?'
-                          + escape_regex(end_of_string)
-                      );
+                    self.wait_for_string_end_rx = new RegExp(
+                      '^(?:[^'
+                        + escape_regex(end_of_string) + '\\\\]|[^\\\\]\\\\'
+                        + escape_regex(end_of_string) + '|\\\\[^'
+                        + escape_regex(end_of_string) + '\\\\])*?'
+                        + escape_regex(end_of_string)
+                    );
                   }
 
                   var multiline_regex = get_multiline_regex(start_regex);
@@ -1252,7 +1253,7 @@ function preg_quote(str, delimiter) {
         /()(<<(['"])(.*?)\3)/, // quoted heredoc
         /()(<<((\S*?))(?=[,;]?(?:$|\s)))/, // bare heredoc
         /(((['"`])))/, // simple quotes
-        /((?:^|[^\w\s\/]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
+        /((?:^|[~\{\(]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
         /(^|[^$@%&])\b((?:q[qxwr]?|m)([^qxwr{\[(<\w\s]))/, // q-quotes, match
         /(^|[^$@%&])\b((?:q[qxwr]?|m) (\w))/, // q-quotes, match with alphabetic delimeters
         /(^|[^$@%&])\b((?:q[qxwr]?|m)(\{))/, // q-quotes, match with "{}" delimeters
