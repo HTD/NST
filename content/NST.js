@@ -1251,7 +1251,8 @@ function preg_quote(str, delimiter) {
       'START_QUOTES_RX_LIST' : [
         /(((?:^|[^$])#))/, // comments
         /()(<<(['"])(.*?)\3)/, // quoted heredoc
-        /()(<<((\S*?))(?=[,;]?(?:$|\s)))/, // bare heredoc
+        //        "\" here to avoid erorr js tree
+        /((?:^|[=./\*,;]|=>|(?:^|[^-])-|(?:^|[^+])\+)\s*)(<<((\w+)))/, // bare heredoc
         /(((['"`])))/, // simple quotes
         /((?:^|[~\{\(]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
         /(^|[^$@%&])\b((?:q[qxwr]?|m)([^qxwr{\[(<\w\s]))/, // q-quotes, match
