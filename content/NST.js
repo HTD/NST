@@ -1254,7 +1254,7 @@ function preg_quote(str, delimiter) {
         //        "\" here to avoid erorr js tree
         /((?:^|[=./\*,;]|=>|(?:^|[^-])-|(?:^|[^+])\+)\s*)(<<((\w+)))/, // bare heredoc
         /(((['"`])))/, // simple quotes
-        /((?:^|[~\{\(]|(?:^|[^$%&@\w])\w+)\s*)((\/))/, // regex delimeter
+        /((?:^|[~\{\(]|(?:^|[^$%&@\w])[a-zA-Z_]\w*)\s*)((\/))/, // regex delimeter
         /(^|[^$@%&])\b((?:q[qxwr]?|m)([^qxwr{\[(<\w\s]))/, // q-quotes, match
         /(^|[^$@%&])\b((?:q[qxwr]?|m) (\w))/, // q-quotes, match with alphabetic delimeters
         /(^|[^$@%&])\b((?:q[qxwr]?|m)(\{))/, // q-quotes, match with "{}" delimeters
