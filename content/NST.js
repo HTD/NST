@@ -1261,7 +1261,7 @@ function preg_quote(str, delimiter) {
         /(^|[^$@%&])\b((?:q[qxwr]?|m)(\[))/, // q-quotes, match with "[]" delimeters
         /(^|[^$@%&])\b((?:q[qxwr]?|m)(\())/, // q-quotes, match with "()" delimeters
         /(^|[^$@%&])\b((?:q[qxwr]?|m)(\<))/, // q-quotes, match with "<>" delimeters
-        /(^|[^$@%&])\b((?:s|tr|y)([^{\[(<\w\s]))/, // s/tr/y
+        /(^|[^$@%&])\b((?:s|tr|y)([^{\[(<\w\s\\]))/, // s/tr/y
         /(^|[^$@%&])\b((?:s|tr|y) (\w))/, // s/tr/y with alphabetic delimeters
         /(^|[^$@%&])\b((?:s|tr|y)(\{))/, // s/tr/y with "{}{}" delimeters
         /(^|[^$@%&])\b((?:s|tr|y)(\())/, // s/tr/y with "()()" delimeters
