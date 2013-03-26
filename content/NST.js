@@ -859,6 +859,7 @@ function preg_quote(str, delimiter) {
     this.START_DOCUMENTATION_RX = config.START_DOCUMENTATION_RX;
     this.END_DOCUMENTATION_RX = config.END_DOCUMENTATION_RX;
     this.HEREDOC_SPACE_ALLOWED = config.HEREDOC_SPACE_ALLOWED;
+    this.TRAILING_PART = config.TRAILING_PART;
 
     var escape_regex = function(str) {
       return str.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&" );
@@ -904,7 +905,7 @@ function preg_quote(str, delimiter) {
         : escape_regex(start) + rx_string;
     }
 
-    var get_singleline_regex = function( start_regex, start, end, ternary ) {
+    var get_singleline_regex = function( start_regex, start, end, ternary, trailing_part ) {
       var singleline_regex_text = regex_to_string(start_regex);
 
       if ( start == end ) {
@@ -928,7 +929,7 @@ function preg_quote(str, delimiter) {
         }
       }
 
-      return new RegExp( singleline_regex_text );
+      return new RegExp( singleline_regex_text + trailing_part );
     };
 
     this.simplify = function(line) {
@@ -1015,9 +1016,13 @@ function preg_quote(str, delimiter) {
                   ? BRACE_PAIR[start_of_string]
                   : start_of_string;
 
+                var trailing_part = self.TRAILING_PART[first_match_index]
+                  ? regex_to_string( self.TRAILING_PART[first_match_index] )
+                  : '';
+
                 var singleline_regex = get_singleline_regex(
                   start_regex, start_of_string, end_of_string,
-                  self.TERNARY[first_match_index] );
+                  self.TERNARY[first_match_index], trailing_part );
 
                 if ( line.match(singleline_regex) ) {
                   line = line.replace(singleline_regex,
@@ -1033,7 +1038,7 @@ function preg_quote(str, delimiter) {
                       '^.*?' + escape_regex(middle)
                     );
                     self.wait_for_string_end_rx_ternary = new RegExp(
-                      '^.*?' + escape_regex(end_of_string)
+                      '^.*?' + escape_regex(end_of_string) + trailing_part
                     );
                   }
                   else {
@@ -1042,7 +1047,7 @@ function preg_quote(str, delimiter) {
                         + escape_regex(end_of_string) + '\\\\]|[^\\\\]\\\\'
                         + escape_regex(end_of_string) + '|\\\\[^'
                         + escape_regex(end_of_string) + '\\\\])*?'
-                        + escape_regex(end_of_string)
+                        + escape_regex(end_of_string) + trailing_part
                     );
                   }
 
@@ -1126,6 +1131,21 @@ function preg_quote(str, delimiter) {
         true, // %-quotes with "[]" delimeters
         true, // %-quotes with "()" delimeters
         true, // %-quotes with "<>" delimeters
+      ],
+      'TRAILING_PART' : [
+        null, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        null, // quoted heredoc with leading "-"
+        null, // bare heredoc with leading "-"
+        null, // simple quotes
+        /[a-z]*/, // regex delimeter
+        null, // %-quotes
+        null, // %-quotes with ' ' delimeter
+        null, // %-quotes with "{}" delimeters
+        null, // %-quotes with "[]" delimeters
+        null, // %-quotes with "()" delimeters
+        null, // %-quotes with "<>" delimeters
       ],
       'COMMENT_RX_INDEX' :       0, // no look behind in js regexes =(
       'HEREDOC_RX_INDEXES' :     [ null, 1, 1, 1, 1 ],
@@ -1305,6 +1325,28 @@ function preg_quote(str, delimiter) {
         true, // s/tr/y with "()()" delimeters
         true, // s/tr/y with "[][]" delimeters
         true, // s/tr/y with "<><>" delimeters
+      ],
+      'TRAILING_PART' : [
+        null, // comments
+        null, // quoted heredoc
+        null, // bare heredoc
+        null, // simple quotes
+        /[a-z]*/, // regex delimeter
+        // BUG: wrong parsing for q{text}s
+        // (trailing "s" removed when code simplified)
+        // but q{text}s is not a valid perl code
+        /[a-z]*/, // q-quotes, match
+        /[a-z]*/, // q-quotes, match with alphabetic delimeters
+        /[a-z]*/, // q-quotes, match with "{}" delimeters
+        /[a-z]*/, // q-quotes, match with "[]" delimeters
+        /[a-z]*/, // q-quotes, match with "()" delimeters
+        /[a-z]*/, // q-quotes, match with "<>" delimeters
+        /[a-z]*/, // s/tr/y
+        /[a-z]*/, // s/tr/y with alphabetic delimeters
+        /[a-z]*/, // s/tr/y with "{}{}" delimeters
+        /[a-z]*/, // s/tr/y with "()()" delimeters
+        /[a-z]*/, // s/tr/y with "[][]" delimeters
+        /[a-z]*/, // s/tr/y with "<><>" delimeters
       ],
       'COMMENT_RX_INDEX' :       0, // no look behind in js regexes =(
       'HEREDOC_RX_INDEXES' :     [ null, 1, 1 ],
