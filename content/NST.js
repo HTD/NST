@@ -1331,7 +1331,7 @@ function preg_quote(str, delimiter) {
           self.zeroIdentation = true;
         }
         else if ( self.type == TYPE_FUNCTION ) {
-          if ( line.match(/sub\s+[\w:]+\s*\([\s$@%;\\]*\)\s*;/) ) { // prototypes
+          if ( line.match(/sub\s+[\w:]+\s*(?:\([\s$@%;\\]*\)\s*)?;/) ) { // prototypes
             self.open = false;
             self.type = TYPE_PROTOTYPE
           }
