@@ -11,6 +11,7 @@
  * Sergey Lerg
  * Roberto Bouzout
  * wa03
+ * Joel Goguen
  *
  * Copyright (c) 2010, Adam Łyskawa
  * All rights reserved.
@@ -665,7 +666,8 @@ function preg_quote(str, delimiter) {
       var parts = line.match(/^(\s*)(.*?)\s*?$/), // main parts of the line
           whitespace = parts[1],
           code = parts[2],
-          indent = whitespace.length / this.indent,
+          // When using tabbed indents with Python, whitespace.length is the indent level
+		  indent = whitespace[0] === '	' ? whitespace.length : whitespace.length / this.indent,
           defBlock = -1, // current def block indentation level
           csBlock = - 1, // current cs block indentation level
           csOffset = 0, // current block relative control structure offset
