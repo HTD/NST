@@ -1273,8 +1273,13 @@ function preg_quote(str, delimiter) {
       'START_QUOTES_RX_LIST' : [
         /(((?:^|[^$])#))/, // comments
         /()(<<(['"])(.*?)\3)/, // quoted heredoc
-        //        "\" here to avoid erorr js tree
-        /((?:^|[=./\*,;]|=>|(?:^|[^-])-|(?:^|[^+])\+)\s*)(<<((\w+)))/, // bare heredoc
+        new RegExp( // bare heredoc
+          '((?:^|[=./*,;]|=>|(?:^|[^-])-|(?:^|[^+])\\+'
+          + '|chdir|chomp|chop|die|do|eval|glob|join|lc|lcfirst|length|mkdir'
+          + '|print|printf|require|return|reverse|rmdir|say|split|sprintf'
+          + '|substr|system|uc|ucfirst|unlink|warn'
+          + ')\\s*)(<<((\\w+)))'
+        ),
         /(((['"`])))/, // simple quotes
         /((?:^|[~\{\(!]|(?:^|[^$%&@\w])[a-zA-Z_]\w*)\s*)((\/))/, // regex delimeter
         /(^|[^$@%&])\b((?:q[qxwr]?|m)([^qxwr{\[(<\w\s]))/, // q-quotes, match
