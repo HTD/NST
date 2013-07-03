@@ -45,7 +45,7 @@
  * Namespaces
  */
 if (typeof ko.extensions === 'undefined') ko.extensions = {};
-if (typeof ko.extensions.NST === 'undefined') ko.extensions.NST = { version : '0.61' };
+if (typeof ko.extensions.NST === 'undefined') ko.extensions.NST = { version : '0.62' };
 
 /**
  * Regular expressions quoting (from phpjs.org) used for comments
