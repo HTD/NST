@@ -1697,8 +1697,8 @@ function preg_quote(str, delimiter) {
      */
     getCellProperties : function(row, column, properties) {
       try {
-
-        properties.AppendElement(this._icons[this.getNodeByRow(row).type]);
+        if (properties) properties.AppendElement(this._icons[this.getNodeByRow(row).type]);
+        else return this._icons[this.getNodeByRow(row).type];
       } catch(e) { xtk2.debug.exceptionHandler(e, NAME); }
     },
     /**
