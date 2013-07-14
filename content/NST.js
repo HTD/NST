@@ -1468,6 +1468,7 @@ function preg_quote(str, delimiter) {
             p = new LineParserPerl();
             break;
           case 'Python':
+          case 'Python3':
             p = new LineParserPython();
             break;
           case 'CSS':
@@ -1543,7 +1544,7 @@ function preg_quote(str, delimiter) {
                 if (lNode.text) id = n.add(lNode.text, lNode.line, TYPE_TAG);
                 if (!lNode.open) n.end();
               }
-            } else if (self.lang == 'Python') { // LineParserPython
+            } else if (self.lang == 'Python' || self.lang == 'Python3') { // LineParserPython
               if (p.type) {
                 if (p.close) n.end(p.close);
                 if (p.text) id = n.add(p.text, p.index + 1, p.type, p.info);
