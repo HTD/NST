@@ -667,7 +667,7 @@ function preg_quote(str, delimiter) {
           whitespace = parts[1],
           code = parts[2],
           // When using tabbed indents with Python, whitespace.length is the indent level
-		  indent = whitespace[0] === '	' ? whitespace.length : whitespace.length / this.indent,
+          indent = whitespace[0] === '	' ? whitespace.length : whitespace.length / this.indent,
           defBlock = -1, // current def block indentation level
           csBlock = - 1, // current cs block indentation level
           csOffset = 0, // current block relative control structure offset
