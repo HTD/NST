@@ -15,21 +15,27 @@
 }
 #NST treechildren::-moz-tree-image(MethodPrivate) {
   list-style-image: url('chrome://NST/skin/default/private.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(MethodProtected) {
   list-style-image: url('chrome://NST/skin/default/protected.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(MethodPublic) {
   list-style-image: url('chrome://NST/skin/default/public.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(MethodPrivateStatic) {
   list-style-image: url('chrome://NST/skin/default/private-static.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(MethodProtectedStatic) {
   list-style-image: url('chrome://NST/skin/default/protected-static.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(MethodPublicStatic) {
   list-style-image: url('chrome://NST/skin/default/public-static.png');
+  margin-left: 8px;
 }
 #NST treechildren::-moz-tree-image(Prototype) {
   list-style-image: url('chrome://NST/skin/default/prototype.png');
