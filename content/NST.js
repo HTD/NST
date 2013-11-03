@@ -860,6 +860,8 @@ function preg_quote(str, delimiter) {
     this.NO_SUCH_STRING_RX = config.NO_SUCH_STRING_RX;
     this.START_DOCUMENTATION_RX = config.START_DOCUMENTATION_RX;
     this.END_DOCUMENTATION_RX = config.END_DOCUMENTATION_RX;
+    this.START_LINEFEED_RX = config.START_LINEFEED_RX;
+    this.END_LINEFEED_RX = config.END_LINEFEED_RX;
     this.HEREDOC_SPACE_ALLOWED = config.HEREDOC_SPACE_ALLOWED;
     this.TRAILING_PART = config.TRAILING_PART;
 
@@ -970,6 +972,9 @@ function preg_quote(str, delimiter) {
         else if ( line.match(self.START_DOCUMENTATION_RX) ) {
           self.wait_for_quote = self.END_DOCUMENTATION_RX;
           line = '';
+        }
+        else if ( line.match(self.START_LINEFEED_RX) ) {
+          self.wait_for_quote = self.END_LINEFEED_RX;
         }
         else {
           while (1) {
@@ -1156,6 +1161,8 @@ function preg_quote(str, delimiter) {
       'NO_SUCH_STRING_RX' :      /$no-such-string^/,
       'START_DOCUMENTATION_RX' : /^=begin\b/,
       'END_DOCUMENTATION_RX' :   /^=end$/,
+      'START_LINEFEED_RX' :      /^.*?\\$/,
+      'END_LINEFEED_RX' :        /^.*?[^\\]$/,
     });
 
     var STATIC_PAIR = {};
@@ -1362,6 +1369,8 @@ function preg_quote(str, delimiter) {
       'NO_SUCH_STRING_RX' :      /$no-such-string^/,
       'START_DOCUMENTATION_RX' : /^=\S/,
       'END_DOCUMENTATION_RX' :   /^=cut$/,
+      'START_LINEFEED_RX' :      null,
+      'END_LINEFEED_RX' :        null,
     });
 
     this.parse = function(line, index) {
