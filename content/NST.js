@@ -1980,6 +1980,9 @@ function preg_quote(str, delimiter) {
           row = t.selection.currentIndex;
       if (!t.getRowCount()) return false;
       if (row > -1) {
+        // Save current location to history before jumping
+        ko.history.note_curr_loc(v);
+        // Jump
         v.scimoz.gotoLine(t.getLinePosition(row) - 1);
         v.setFocus();
         ko.commands.doCommand('cmd_editCenterVertically');
