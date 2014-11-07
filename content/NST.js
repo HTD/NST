@@ -1509,6 +1509,7 @@ function preg_quote(str, delimiter) {
           case 'CoffeeScript':
             p = new LineParserCoffee();
             break;
+          case 'Node.js':
           case 'JavaScript':
             p = new LineParserJS(self.lang,
                                  ['name.prototype = {',
@@ -1548,6 +1549,8 @@ function preg_quote(str, delimiter) {
           case 'Python3':
             p = new LineParserPython();
             break;
+          case 'SCSS':
+          case 'Sass':
           case 'CSS':
             p = new LineParserJS(self.lang,
                                  ['@name,'],
