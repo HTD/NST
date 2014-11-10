@@ -723,6 +723,80 @@ function preg_quote(str, delimiter) {
       }
     };
   };
+
+  LineParserCoffee = function() {
+    this.document = ko.views.manager.currentView.koDoc;
+    this.indent = this.document.indentWidth;
+    this.index = -1; // processed line number
+    this.text = null;
+    this.type = TYPE_UNKNOWN; // set to TYPE_CLASS or TYPE_FUNCTION
+    this.close = 0; // how many node levels to close before adding this node
+    this.defBlock = 0; // def block offset state
+    this.csBlock = 0; // cs block offset state
+    this.csOffset = 0; // relative offset for control structure
+    this.info = undefined; // aditional tooltip text
+    var id = '[a-zA-Z][a-zA-Z0-9_.]*', // identifier match
+        pp = new Preprocessor(id, ['#'], [], 'Coffee'); // preprocessor instance
+    this.parse = function(line, index) {
+      this.text = undefined; // initial state (for empty lines / unmatched)
+      this.type = undefined; // initial state (for empty lines / unmatched)
+      line = pp.parse(line, index, true); if (!line) return;
+      var parts = line.match(/^(\s*)(.*?)\s*?$/), // main parts of the line
+          whitespace = parts[1],
+          code = parts[2],
+          indent = whitespace.length / this.indent,
+          defBlock = -1, // current def block indentation level
+          csBlock = - 1, // current cs block indentation level
+          csOffset = 0, // current block relative control structure offset
+          i, // local index
+          tab = ''; // single indentation string
+      for (i = 0; i < this.document.tabWidth; i++) tab+= ' ';
+      line = line.replace(/\t/g, tab);
+      this.index = pp.defBlockReady ? (1 * pp.defBlockStart) : (1 * index);
+      // non-empty nodes:
+      if (code) {
+        defBlock = -1; // like not found
+        csBlock = -1; // like not found
+        csOffset = 0; //
+        if ((parts = code.match(/^class \s*(.+)$/))) {
+          defBlock = indent; // matched class
+          this.text = parts[1];
+          this.type = TYPE_CLASS;
+        } else if ((parts = code.match(/^(\w+)\s*:\s*(.*)[-=]>$/))) {
+          defBlock = indent; // matched def
+          this.text = parts[1] + parts[2];
+          this.type = TYPE_FUNCTION;
+        } else if ((parts = code.match(/^(.*),\s*(.*)[-=]>$/))) {
+          defBlock = indent; // matched def
+          this.text = '(anon.) ' + parts[1];
+          this.type = TYPE_FUNCTION;
+        } else if (code.match(/:$/)) { // matched control structure
+          csBlock = indent;
+          csOffset = this.csOffset + (
+            this.defBlock >= this.csBlock
+              ? indent - this.defBlock + 1 // THIS ONE IS IMPORTANT!!!
+              : indent - this.csBlock
+          );
+        }
+        if (defBlock >= 0) { // we have a definition block...
+          if (defBlock <= this.csBlock) {
+            this.csBlock = 0;
+            this.csOffset = 0;
+          }
+          this.close = this.defBlock + this.csOffset - defBlock + 1; // determine how many levels to close
+          this.defBlock = defBlock - this.csOffset; // remember the position in state
+        }
+        if (csBlock >= 0) { // we have control structure block...
+          if (csBlock < this.csBlock) {
+            this.csOffset-= this.csBlock - csBlock;
+            this.csBlock = csBlock;
+          } else this.csBlock = csBlock;
+        }
+        if (csOffset > 0) this.csOffset = csOffset;
+      }
+    };
+  };
+
   /**
    * Unique Lua parser
    */
@@ -1432,6 +1506,10 @@ function preg_quote(str, delimiter) {
        */
       var getLineParser = function(self) {
         switch (self.lang = d.language) {
+          case 'CoffeeScript':
+            p = new LineParserCoffee();
+            break;
+          case 'Node.js':
           case 'JavaScript':
             p = new LineParserJS(self.lang,
                                  ['name.prototype = {',
@@ -1471,6 +1549,8 @@ function preg_quote(str, delimiter) {
           case 'Python3':
             p = new LineParserPython();
             break;
+          case 'SCSS':
+          case 'Sass':
           case 'CSS':
             p = new LineParserJS(self.lang,
                                  ['@name,'],
