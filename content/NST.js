@@ -1558,14 +1558,10 @@ function preg_quote(str, delimiter) {
           case 'Python3':
             p = new LineParserPython();
             break;
-<<<<<<< HEAD
           case 'SCSS':
           case 'Sass':
-=======
-          case 'Less':
->>>>>>> ac05e3859d2e5fcff53b1210533ed564ac48b150
           case 'CSS':
-            p = new LineParserJS('CSS',
+            p = new LineParserJS(self.lang,
                                  ['@name,'],
                                  ['name {'],
                                  '[\\-*#.a-zA-Z_]' +
