@@ -667,7 +667,7 @@ function preg_quote(str, delimiter) {
           whitespace = parts[1],
           code = parts[2],
           // When using tabbed indents with Python, whitespace.length is the indent level
-		  indent = whitespace[0] === '	' ? whitespace.length : whitespace.length / this.indent,
+          indent = whitespace[0] === '	' ? whitespace.length : whitespace.length / this.indent,
           defBlock = -1, // current def block indentation level
           csBlock = - 1, // current cs block indentation level
           csOffset = 0, // current block relative control structure offset
@@ -1555,6 +1555,7 @@ function preg_quote(str, delimiter) {
             p = new LineParserPerl();
             break;
           case 'Python':
+          case 'Python3':
             p = new LineParserPython();
             break;
 <<<<<<< HEAD
@@ -1636,7 +1637,7 @@ function preg_quote(str, delimiter) {
                 if (lNode.text) id = n.add(lNode.text, lNode.line, TYPE_TAG);
                 if (!lNode.open) n.end();
               }
-            } else if (self.lang == 'Python') { // LineParserPython
+            } else if (self.lang == 'Python' || self.lang == 'Python3') { // LineParserPython
               if (p.type) {
                 if (p.close) n.end(p.close);
                 if (p.text) id = n.add(p.text, p.index + 1, p.type, p.info);
