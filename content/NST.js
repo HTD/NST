@@ -1560,6 +1560,7 @@ function preg_quote(str, delimiter) {
             break;
           case 'SCSS':
           case 'Sass':
+          case 'LESS': 
           case 'CSS':
             p = new LineParserJS(self.lang,
                                  ['@name,'],
