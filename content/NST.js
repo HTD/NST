@@ -2029,13 +2029,13 @@ function preg_quote(str, delimiter) {
     reloadSource : function() {
       try {
         if (!this.sourceTreeView.tree) this.init();
-				if (ko.views.manager.currentView.koDoc.buffer.length > MAX_BUFFER) {
-					// File is too large, skip it
-				  // TODO: Set status bar
-					CodeParser.nodeList.nodes = []
-					this.viewChanged = true;
-				  return;
-				}
+        if (ko.views.manager.currentView.koDoc.buffer.length > MAX_BUFFER) {
+          // File is too large, skip it
+          // TODO: Set status bar
+          CodeParser.nodeList.nodes = []
+          this.viewChanged = true;
+          return;
+        }
         CodeParser.settings = main.settings;
         CodeParser.parse();
         if (main.settings.get('sort')) this.sortTree();
