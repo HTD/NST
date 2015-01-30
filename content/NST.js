@@ -87,6 +87,7 @@ function preg_quote(str, delimiter) {
         TYPE_TAG              = 12,
         TYPE_STYLE            = 13,
         TYPE_AT_RULE          = 14,
+        MAX_BUFFER            = 150000
         // Display name
         NAME = 'NST';
   ///
@@ -1500,8 +1501,8 @@ function preg_quote(str, delimiter) {
      * @param view
      */
     parse : function() {
-      var d = ko.views.manager.currentView.koDoc,
-          l = this.lines = d.buffer.split(/\r?\n|\r/), // code lines
+      var d = ko.views.manager.currentView.koDoc;
+      var l = this.lines = d.buffer.split(/\r?\n|\r/), // code lines
           n = this.nodeList = new nodeList(), // nodeList object
           b = this.backupList = new nodeList(), // backup nodeList
           p, // line parser
@@ -2028,12 +2029,20 @@ function preg_quote(str, delimiter) {
     reloadSource : function() {
       try {
         if (!this.sourceTreeView.tree) this.init();
+				if (ko.views.manager.currentView.koDoc.buffer.length > MAX_BUFFER) {
+					// File is too large, skip it
+				  // TODO: Set status bar
+					CodeParser.nodeList.nodes = []
+					this.viewChanged = true;
+				  return;
+				}
         CodeParser.settings = main.settings;
         CodeParser.parse();
         if (main.settings.get('sort')) this.sortTree();
         if (!this.filterTree()) this.loadTree();
         if (main.settings.get('locate')) main.locateLine();
         this.viewChanged = false;
+				NST.sourceTreeView.toggleOpenAll();
       } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     }
   };
