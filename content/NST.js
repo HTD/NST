@@ -1291,7 +1291,7 @@ function preg_quote(str, delimiter) {
           self.type = TYPE_CLASS;
           next_depth();
         }
-        else if ((parts = code.match(/^def \s*([^\s\(]+)/))) {
+        else if ((parts = code.match(/^(?:def|task) \s*([^\s\(]+)/))) {
           self.text = parts[1];
           self.type = self.current_visibility;
           if ((parts = self.text.match(/^self\.(.+)$/))) {
