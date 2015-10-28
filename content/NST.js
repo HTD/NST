@@ -2309,7 +2309,7 @@ function preg_quote(str, delimiter) {
       );
       xtk2.events.view_closed(function(event) {
         // if no more views - this removes the last source from the tree
-        if (!ko.views.manager._viewCount) self.refresh();
+        if (!ko.views.manager._viewCount) main.refresh();
       });
       if (main.settings.get('locate')) main.setAutoLocate(true);
       main.refresh();
