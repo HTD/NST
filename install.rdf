@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>NST@nisza.org</em:id>
     <em:name>NST</em:name>
@@ -8,18 +7,21 @@
     <em:description>A source tree with all the available classes, methods and functions</em:description>
     <em:creator>Adam Lyskawa</em:creator>
     <em:homepageURL>http://community.activestate.com/xpi/nst-new-source-tree</em:homepageURL>
-    <em:type>2</em:type> <!-- type=extension -->
-    <em:targetApplication> <!-- Komodo IDE -->
+    <em:type>2</em:type>
+    <!-- type=extension -->
+    <em:targetApplication>
+      <!-- Komodo IDE -->
       <Description>
         <em:id>{36E66FA0-F259-11D9-850E-000D935D3368}</em:id>
-        <em:minVersion>4.1</em:minVersion>
+        <em:minVersion>8.*</em:minVersion>
         <em:maxVersion>9.*</em:maxVersion>
       </Description>
     </em:targetApplication>
-    <em:targetApplication> <!-- Komodo Edit -->
+    <em:targetApplication>
+      <!-- Komodo Edit -->
       <Description>
         <em:id>{b1042fb5-9e9c-11db-b107-000d935d3368}</em:id>
-        <em:minVersion>4.1</em:minVersion>
+        <em:minVersion>8.*</em:minVersion>
         <em:maxVersion>9.*</em:maxVersion>
       </Description>
     </em:targetApplication>
