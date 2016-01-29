@@ -300,9 +300,9 @@ function preg_quote(str, delimiter) {
         if ((lm = line.match(/'.*?'/g))) this.literals = this.literals.concat(lm);
         if ((lm = line.match(/".*?"/g))) this.literals = this.literals.concat(lm);
         if ((lm = line.match(/\/.+?\//g))) this.literals = this.literals.concat(lm);
-        line = line.replace(/'.*?'/g, "'...'")
-                   .replace(/".*?"/g, '"..."')
-                   .replace(/\/.+?\//g, '/.../'); // remove literals from code
+        // line = line.replace(/'.*?'/g, "'...'")
+        //            .replace(/".*?"/g, '"..."')
+        //            .replace(/\/.+?\//g, '/.../'); // remove literals from code
         for (i in this.literals) this.literals[i] =
           this.literals[i].replace(/\x00/g, "\\'")
                      .replace(/\x01/g, '\\"')
@@ -767,9 +767,9 @@ function preg_quote(str, delimiter) {
           defBlock = indent; // matched def
           this.text = parts[1] + parts[2];
           this.type = TYPE_FUNCTION;
-        } else if ((parts = code.match(/^(.*),\s*(.*)[-=]>$/))) {
+        } else if ((parts = code.match(/^(.*)[-=]>$/))) {
           defBlock = indent; // matched def
-          this.text = '(anon.) ' + parts[1];
+          this.text = parts[1];
           this.type = TYPE_FUNCTION;
         } else if (code.match(/:$/)) { // matched control structure
           csBlock = indent;
