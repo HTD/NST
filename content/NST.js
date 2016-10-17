@@ -2042,7 +2042,6 @@ function preg_quote(str, delimiter) {
         if (!this.filterTree()) this.loadTree();
         if (main.settings.get('locate')) main.locateLine();
         this.viewChanged = false;
-				NST.sourceTreeView.toggleOpenAll();
       } catch (e) { xtk2.debug.exceptionHandler(e, NAME); }
     }
   };
@@ -2307,6 +2306,7 @@ function preg_quote(str, delimiter) {
   this.load = function() {
     try {
       main.settings.init(); // this loads defaults if ran for the first time
+      main.settings.set('expand', true);
       main.settings.updateIcons(); // now it's done here
       NST = new NSTClass();
       xtk2.events.bind(
