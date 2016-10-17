@@ -1,5 +1,4 @@
 content xtk2 xtk2/
 content NST content/
 skin NST classic/1.0 skin/
-overlay chrome://komodo/content/komodo.xul chrome://NST/content/overlay-ko6.xul appversion<=6.99
-overlay chrome://komodo/content/komodo.xul chrome://NST/content/overlay-ko7.xul appversion>6.99
+overlay chrome://komodo/content/komodo.xul chrome://NST/content/overlay.xul

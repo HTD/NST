@@ -87,6 +87,7 @@ function preg_quote(str, delimiter) {
         TYPE_TAG              = 12,
         TYPE_STYLE            = 13,
         TYPE_AT_RULE          = 14,
+        MAX_BUFFER            = 150000
         // Display name
         NAME = 'NST';
   ///
@@ -299,9 +300,9 @@ function preg_quote(str, delimiter) {
         if ((lm = line.match(/'.*?'/g))) this.literals = this.literals.concat(lm);
         if ((lm = line.match(/".*?"/g))) this.literals = this.literals.concat(lm);
         if ((lm = line.match(/\/.+?\//g))) this.literals = this.literals.concat(lm);
-        line = line.replace(/'.*?'/g, "'...'")
-                   .replace(/".*?"/g, '"..."')
-                   .replace(/\/.+?\//g, '/.../'); // remove literals from code
+        // line = line.replace(/'.*?'/g, "'...'")
+        //            .replace(/".*?"/g, '"..."')
+        //            .replace(/\/.+?\//g, '/.../'); // remove literals from code
         for (i in this.literals) this.literals[i] =
           this.literals[i].replace(/\x00/g, "\\'")
                      .replace(/\x01/g, '\\"')
@@ -766,9 +767,9 @@ function preg_quote(str, delimiter) {
           defBlock = indent; // matched def
           this.text = parts[1] + parts[2];
           this.type = TYPE_FUNCTION;
-        } else if ((parts = code.match(/^(.*),\s*(.*)[-=]>$/))) {
+        } else if ((parts = code.match(/^(.*)[-=]>$/))) {
           defBlock = indent; // matched def
-          this.text = '(anon.) ' + parts[1];
+          this.text = parts[1];
           this.type = TYPE_FUNCTION;
         } else if (code.match(/:$/)) { // matched control structure
           csBlock = indent;
@@ -1290,7 +1291,7 @@ function preg_quote(str, delimiter) {
           self.type = TYPE_CLASS;
           next_depth();
         }
-        else if ((parts = code.match(/^def \s*([^\s\(]+)/))) {
+        else if ((parts = code.match(/^(?:def|task) \s*([^\s\(]+)/))) {
           self.text = parts[1];
           self.type = self.current_visibility;
           if ((parts = self.text.match(/^self\.(.+)$/))) {
@@ -1500,8 +1501,8 @@ function preg_quote(str, delimiter) {
      * @param view
      */
     parse : function() {
-      var d = ko.views.manager.currentView.koDoc,
-          l = this.lines = d.buffer.split(/\r?\n|\r/), // code lines
+      var d = ko.views.manager.currentView.koDoc;
+      var l = this.lines = d.buffer.split(/\r?\n|\r/), // code lines
           n = this.nodeList = new nodeList(), // nodeList object
           b = this.backupList = new nodeList(), // backup nodeList
           p, // line parser
@@ -2028,6 +2029,13 @@ function preg_quote(str, delimiter) {
     reloadSource : function() {
       try {
         if (!this.sourceTreeView.tree) this.init();
+        if (ko.views.manager.currentView.koDoc.buffer.length > MAX_BUFFER) {
+          // File is too large, skip it
+          // TODO: Set status bar
+          CodeParser.nodeList.nodes = []
+          this.viewChanged = true;
+          return;
+        }
         CodeParser.settings = main.settings;
         CodeParser.parse();
         if (main.settings.get('sort')) this.sortTree();
@@ -2298,6 +2306,7 @@ function preg_quote(str, delimiter) {
   this.load = function() {
     try {
       main.settings.init(); // this loads defaults if ran for the first time
+      main.settings.set('expand', true);
       main.settings.updateIcons(); // now it's done here
       NST = new NSTClass();
       xtk2.events.bind(
