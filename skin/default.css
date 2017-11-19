@@ -110,3 +110,10 @@
 .refreshSource-icon{
   list-style-image: url('chrome://komodo/skin/global/images/refresh.png');
 }
+#workspace_left_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon,
+#workspace_right_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon {
+  width: 14px;
+  height: 14px;
+  visibility: visible;
+  background-image: url('koicon://ko-svg/chrome/icomoon/skin/list.svg') !important;
+}
