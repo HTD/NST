@@ -47,7 +47,7 @@
   list-style-image: url('chrome://NST/skin/default/jquery-ext.svg');
 }
 #NST treechildren::-moz-tree-image(Tag) {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/tag.png');
+  list-style-image: url('chrome://NST/skin/default/tag.svg');
 }
 #NST treechildren::-moz-tree-image(Style) {
   list-style-image: url('chrome://NST/skin/default/style.svg');
@@ -56,7 +56,7 @@
   list-style-image: url('chrome://NST/skin/default/at-rule.svg');
 }
 .sourceClearFilter{
-  list-style-image: url('chrome://komodo/skin/images/list_item_remove.png');
+  list-style-image: url('chrome://NST/skin/default/list-item-remove.svg');
 }
 .toggleSort-icon {
   list-style-image: url('chrome://NST/skin/default/sort-lines.svg');
@@ -95,19 +95,19 @@
   list-style-image: url('chrome://NST/skin/default/locate-node.svg');
 }
 .toggleHTMLfilter-icon {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code.svg');
 }
 .toggleHTMLfilter-icon:hover {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code-red.svg');
 }
 .toggleHTMLfilter-icon.active {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code-red.svg');
 }
 .toggleHTMLfilter-icon.active:hover {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code.svg');
 }
 .refreshSource-icon{
-  list-style-image: url('chrome://komodo/skin/global/images/refresh.png');
+  list-style-image: url('chrome://NST/skin/default/refresh.svg');
 }
 #workspace_left_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon,
 #workspace_right_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon {
