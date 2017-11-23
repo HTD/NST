@@ -3,7 +3,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>NST@nisza.org</em:id>
     <em:name>NST</em:name>
-    <em:version>0.63</em:version>
+    <em:version>0.64</em:version>
     <em:description>A source tree with all the available classes, methods and functions</em:description>
     <em:creator>Adam Lyskawa</em:creator>
     <em:homepageURL>http://community.activestate.com/xpi/nst-new-source-tree</em:homepageURL>
@@ -14,7 +14,7 @@
       <Description>
         <em:id>{36E66FA0-F259-11D9-850E-000D935D3368}</em:id>
         <em:minVersion>8.*</em:minVersion>
-        <em:maxVersion>9.*</em:maxVersion>
+        <em:maxVersion>11.*</em:maxVersion>
       </Description>
     </em:targetApplication>
     <em:targetApplication>
@@ -22,7 +22,7 @@
       <Description>
         <em:id>{b1042fb5-9e9c-11db-b107-000d935d3368}</em:id>
         <em:minVersion>8.*</em:minVersion>
-        <em:maxVersion>9.*</em:maxVersion>
+        <em:maxVersion>11.*</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>
