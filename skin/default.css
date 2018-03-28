@@ -5,108 +5,108 @@
   font-weight: bold;
 }
 #NST treechildren::-moz-tree-image(Unknown) {
-  list-style-image: url("chrome://NST/skin/default/node-design.png");
+  list-style-image: url("chrome://NST/skin/default/node-design.svg");
 }
 #NST treechildren::-moz-tree-image(Class) {
-  list-style-image: url("chrome://NST/skin/default/class.png");
+  list-style-image: url("chrome://NST/skin/default/class.svg");
 }
 #NST treechildren::-moz-tree-image(Function) {
-  list-style-image: url("chrome://NST/skin/default/function.png");
+  list-style-image: url("chrome://NST/skin/default/function.svg");
 }
 #NST treechildren::-moz-tree-image(MethodPrivate) {
-  list-style-image: url('chrome://NST/skin/default/private.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/private.svg');
 }
 #NST treechildren::-moz-tree-image(MethodProtected) {
-  list-style-image: url('chrome://NST/skin/default/protected.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/protected.svg');
 }
 #NST treechildren::-moz-tree-image(MethodPublic) {
-  list-style-image: url('chrome://NST/skin/default/public.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/public.svg');
 }
 #NST treechildren::-moz-tree-image(MethodPrivateStatic) {
-  list-style-image: url('chrome://NST/skin/default/private-static.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/private-static.svg');
 }
 #NST treechildren::-moz-tree-image(MethodProtectedStatic) {
-  list-style-image: url('chrome://NST/skin/default/protected-static.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/protected-static.svg');
 }
 #NST treechildren::-moz-tree-image(MethodPublicStatic) {
-  list-style-image: url('chrome://NST/skin/default/public-static.png');
-  margin-left: 8px;
+  list-style-image: url('chrome://NST/skin/default/public-static.svg');
 }
 #NST treechildren::-moz-tree-image(Prototype) {
-  list-style-image: url('chrome://NST/skin/default/prototype.png');
+  list-style-image: url('chrome://NST/skin/default/prototype.svg');
 }
 #NST treechildren::-moz-tree-image(PrototypeClass) {
-  list-style-image: url('chrome://NST/skin/default/prototype-class.png');
+  list-style-image: url('chrome://NST/skin/default/prototype-class.svg');
 }
 #NST treechildren::-moz-tree-image(jQueryExt) {
-  list-style-image: url('chrome://NST/skin/default/jquery-ext.png');
+  list-style-image: url('chrome://NST/skin/default/jquery-ext.svg');
 }
 #NST treechildren::-moz-tree-image(Tag) {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/tag.png');
+  list-style-image: url('chrome://NST/skin/default/tag.svg');
 }
 #NST treechildren::-moz-tree-image(Style) {
-  list-style-image: url('chrome://NST/skin/default/style.png');
+  list-style-image: url('chrome://NST/skin/default/style.svg');
 }
 #NST treechildren::-moz-tree-image(AtRule) {
-  list-style-image: url('chrome://NST/skin/default/at-rule.png');
+  list-style-image: url('chrome://NST/skin/default/at-rule.svg');
 }
 .sourceClearFilter{
-  list-style-image: url('chrome://komodo/skin/images/list_item_remove.png');
+  list-style-image: url('chrome://NST/skin/default/list-item-remove.svg');
 }
 .toggleSort-icon {
-  list-style-image: url('chrome://NST/skin/default/sort_lines.gif');
+  list-style-image: url('chrome://NST/skin/default/sort-lines.svg');
 }
 .toggleSort-icon:hover {
-  list-style-image: url('chrome://NST/skin/default/sort_alpha.gif');
+  list-style-image: url('chrome://NST/skin/default/sort-alpha.svg');
 }
 .toggleSort-icon.active {
-  list-style-image: url('chrome://NST/skin/default/sort_alpha.gif');
-  border: 1px solid #888;
+  list-style-image: url('chrome://NST/skin/default/sort-alpha.svg');
 }
 .toggleSort-icon.active:hover {
-  list-style-image: url('chrome://NST/skin/default/sort_lines.gif');
+  list-style-image: url('chrome://NST/skin/default/sort-lines.svg');
 }
 .toggleExpand-icon {
-  list-style-image: url('chrome://NST/skin/default/collapse.png');
+  list-style-image: url('chrome://NST/skin/default/collapse.svg');
 }
 .toggleExpand-icon:hover {
-  list-style-image: url('chrome://NST/skin/default/expand.png');
+  list-style-image: url('chrome://NST/skin/default/expand.svg');
 }
 .toggleExpand-icon.active {
-  list-style-image: url('chrome://NST/skin/default/expand.png');
+  list-style-image: url('chrome://NST/skin/default/expand.svg');
 }
 .toggleExpand-icon.active:hover {
-  list-style-image: url('chrome://NST/skin/default/collapse.png');
+  list-style-image: url('chrome://NST/skin/default/collapse.svg');
 }
 .toggleLocate-icon {
-  list-style-image: url('chrome://NST/skin/default/locate_node.png');
+  list-style-image: url('chrome://NST/skin/default/locate-node.svg');
 }
 .toggleLocate-icon:hover {
-  list-style-image: url('chrome://NST/skin/default/locate_node_active.png');
+  list-style-image: url('chrome://NST/skin/default/locate-node-active.svg');
 }
 .toggleLocate-icon.active {
-  list-style-image: url('chrome://NST/skin/default/locate_node_active.png');
+  list-style-image: url('chrome://NST/skin/default/locate-node-active.svg');
 }
 .toggleLocate-icon.active:hover {
-  list-style-image: url('chrome://NST/skin/default/locate_node.png');
+  list-style-image: url('chrome://NST/skin/default/locate-node.svg');
 }
 .toggleHTMLfilter-icon {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code.svg');
 }
 .toggleHTMLfilter-icon:hover {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code-red.svg');
 }
 .toggleHTMLfilter-icon.active {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code_red.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code-red.svg');
 }
 .toggleHTMLfilter-icon.active:hover {
-  list-style-image: url('chrome://famfamfamsilk/skin/icons/page_white_code.png');
+  list-style-image: url('chrome://NST/skin/default/page-white-code.svg');
 }
 .refreshSource-icon{
-  list-style-image: url('chrome://komodo/skin/global/images/refresh.png');
+  list-style-image: url('chrome://NST/skin/default/refresh.svg');
+}
+#workspace_left_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon,
+#workspace_right_area[type="icons"] tab[widget="NST-viewbox"] .tab-icon {
+  width: 14px;
+  height: 14px;
+  visibility: visible;
+  background-image: url('koicon://ko-svg/chrome/icomoon/skin/list.svg') !important;
 }
